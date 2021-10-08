@@ -24,6 +24,10 @@ export class User {
 
   @Column()
   @ApiProperty()
+  points: number = 0;
+
+  @Column()
+  @ApiProperty()
   rights: Rights = Rights.USER;
 
   @Column()
