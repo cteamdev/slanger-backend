@@ -1,6 +1,6 @@
 import { TransformZalgo } from '@/common/decorators/transform-zalgo.decorator';
-import { ApiProperty } from '@nestjs/swagger';
-import { IsEnum, IsString, Length } from 'class-validator';
+import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
+import { IsEnum, IsOptional, IsString, Length } from 'class-validator';
 
 import { SlangType } from '../types/slang-type.types';
 
@@ -12,12 +12,13 @@ export class CreateSlangDto {
   type: SlangType;
 
   @IsString()
+  @IsOptional()
   @Length(1, 200)
-  @ApiProperty({
+  @ApiPropertyOptional({
     minLength: 1,
     maxLength: 200
   })
-  cover: string;
+  cover: string | null;
 
   @IsString()
   @Length(1, 40)

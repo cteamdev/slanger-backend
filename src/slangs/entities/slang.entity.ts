@@ -28,9 +28,9 @@ export class Slang {
   @ApiProperty()
   type: SlangType;
 
-  @Column()
-  @ApiProperty()
-  cover: string;
+  @Column({ nullable: true })
+  @ApiPropertyOptional()
+  cover: string | null;
 
   @Column()
   @ApiProperty()
