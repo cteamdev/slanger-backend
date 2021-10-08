@@ -35,6 +35,24 @@ export class SlangsService {
     private readonly votesRepository: Repository<Vote>
   ) {}
 
+  async myVote(currentUser: User, id: number): Promise<Vote | undefined> {
+    const slang: Slang | undefined = await this.slangsRepository.findOne(
+      {
+        id
+      },
+      {
+        relations: this.helpersService.getSlangRelations()
+      }
+    );
+    if (!slang) return;
+
+    const vote: Vote | undefined = slang.votes.find(
+      (vote) => vote.user.id === currentUser.id
+    );
+
+    return vote;
+  }
+
   async create(currentUser: User, body: CreateSlangDto): Promise<Slang> {
     const dayLimit: number = 10;
 

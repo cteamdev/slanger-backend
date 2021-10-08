@@ -11,6 +11,8 @@ import { User } from '@/users/entities/user.entity';
 import { SlangStatus } from '../types/slang-status.types';
 import { SlangType } from '../types/slang-type.types';
 import { Vote } from './vote.entity';
+import { Transform } from 'class-transformer';
+import { VoteType } from '../types/vote-type.types';
 
 @Entity()
 export class Slang {
@@ -39,8 +41,18 @@ export class Slang {
   description: string;
 
   @OneToMany(() => Vote, (vote) => vote.slang)
-  @ApiProperty({ type: () => Vote })
+  @Transform(({ value }) =>
+    (value as Vote[]).length > 0
+      ? (value as Vote[])
+          .map((vote) => (vote.type === VoteType.DOWN ? -1 : 1) as number)
+          .reduce((pv, cv) => pv + cv)
+      : 0
+  )
+  @ApiProperty({ type: 'number' })
   votes: Vote[];
+
+  @ApiProperty()
+  myVote: VoteType;
 
   @Column()
   @ApiProperty()

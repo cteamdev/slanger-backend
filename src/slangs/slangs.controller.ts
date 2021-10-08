@@ -1,4 +1,11 @@
-import { Body, Controller, Post, SerializeOptions } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Get,
+  Post,
+  Query,
+  SerializeOptions
+} from '@nestjs/common';
 import {
   ApiBadRequestResponse,
   ApiCookieAuth,
@@ -17,12 +24,23 @@ import { CreateSlangDto } from './dto/create-slang.dto';
 import { EditSlangDto } from './dto/edit-slang.dto';
 import { DeleteSlangDto } from './dto/delete-slang.dto';
 import { VoteSlangDto } from './dto/vote-slang.dto';
+import { Vote } from './entities/vote.entity';
 
 @Controller('slangs')
 @ApiCookieAuth('x-vk')
 @ApiTags('Слэнги')
 export class SlangsController {
   constructor(private readonly slangsService: SlangsService) {}
+
+  @Get('/myVote')
+  @ApiResponse({ status: 200, type: Vote })
+  @ApiNotFoundResponse()
+  myVote(
+    @CurrentUser() currentUser: User,
+    @Query('id') id: number
+  ): Promise<Vote | undefined> {
+    return this.slangsService.myVote(currentUser, id);
+  }
 
   @Post('/create')
   @SerializeOptions({ groups: [Groups.CURRENT_USER] })
