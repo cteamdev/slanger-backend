@@ -17,6 +17,14 @@ export class Slang {
 
   @Column()
   @ApiProperty()
+  type: SlangType;
+
+  @Column()
+  @ApiProperty()
+  cover: string;
+
+  @Column()
+  @ApiProperty()
   word: string;
 
   @Column()
@@ -25,15 +33,7 @@ export class Slang {
 
   @Column()
   @ApiProperty()
-  type: SlangType;
-
-  @Column()
-  @ApiProperty()
   status: SlangStatus = SlangStatus.MODERATING;
-
-  @Column('text', { array: true })
-  @ApiProperty()
-  attachments: string[];
 
   @Column('timestamp')
   @ApiProperty()
