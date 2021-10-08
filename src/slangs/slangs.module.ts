@@ -3,12 +3,13 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 
 import { HelpersModule } from '@/common/helpers/helpers.module';
 import { User } from '@/users/entities/user.entity';
+import { Slang } from './entities/slang.entity';
+import { Vote } from './entities/vote.entity';
 import { SlangsService } from './slangs.service';
 import { SlangsController } from './slangs.controller';
-import { Slang } from './entities/slang.entity';
 
 @Module({
-  imports: [TypeOrmModule.forFeature([User, Slang]), HelpersModule],
+  imports: [TypeOrmModule.forFeature([User, Slang, Vote]), HelpersModule],
   controllers: [SlangsController],
   providers: [SlangsService]
 })

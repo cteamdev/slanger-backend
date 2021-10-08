@@ -24,15 +24,25 @@ export class HelpersService {
   }
 
   getUserRelations(): string[] {
-    return ['slangs', 'bookmarks', 'settings'];
+    return [
+      'slangs',
+      'slangs.user',
+      'slangs.votes',
+      'slangs.votes.user',
+      'bookmarks',
+      'bookmarks.slang',
+      'bookmarks.slang.votes',
+      'bookmarks.slang.votes.user',
+      'settings'
+    ];
   }
 
   getSlangRelations(): string[] {
-    return ['user'];
+    return ['user', 'votes', 'votes.user'];
   }
 
   getBookmarkRelations(): string[] {
-    return ['user', 'slang'];
+    return ['user', 'slang', 'slang.votes', 'slang.votes.user'];
   }
 
   stripFloat(number: number, fractionDigits: number): number {

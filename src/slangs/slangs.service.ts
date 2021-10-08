@@ -11,10 +11,13 @@ import { HelpersService } from '@/common/helpers/helpers.service';
 import { Rights } from '@/common/types/rights.types';
 import { User } from '@/users/entities/user.entity';
 import { Slang } from './entities/slang.entity';
+import { Vote } from './entities/vote.entity';
 import { SlangStatus } from './types/slang-status.types';
 import { CreateSlangDto } from './dto/create-slang.dto';
 import { EditSlangDto } from './dto/edit-slang.dto';
 import { DeleteSlangDto } from './dto/delete-slang.dto';
+import { VoteSlangDto } from './dto/vote-slang.dto';
+import { VoteType } from './types/vote-type.types';
 
 @Injectable()
 export class SlangsService {
@@ -27,7 +30,9 @@ export class SlangsService {
     @InjectRepository(User)
     private readonly usersRepository: Repository<User>,
     @InjectRepository(Slang)
-    private readonly slangsRepository: Repository<Slang>
+    private readonly slangsRepository: Repository<Slang>,
+    @InjectRepository(Vote)
+    private readonly votesRepository: Repository<Vote>
   ) {}
 
   async create(currentUser: User, body: CreateSlangDto): Promise<Slang> {
@@ -125,6 +130,65 @@ export class SlangsService {
     await this.slangsRepository.remove(slang);
     await this.meiliIndex.deleteDocument(id);
 
+    return slang;
+  }
+
+  async vote(
+    currentUser: User,
+    { id, type }: VoteSlangDto
+  ): Promise<Slang | undefined> {
+    const slang: Slang | undefined = await this.slangsRepository.findOne(
+      {
+        id
+      },
+      {
+        relations: this.helpersService.getSlangRelations()
+      }
+    );
+    if (!slang) return;
+
+    if (slang.user && slang.user.id === currentUser.id)
+      throw new HttpException(
+        'Нельзя проголосовать за свой слэнг',
+        HttpStatus.BAD_REQUEST
+      );
+    if (slang.status !== SlangStatus.PUBLIC)
+      throw new HttpException(
+        'Голосовать можно только за публичные слэнги',
+        HttpStatus.BAD_REQUEST
+      );
+
+    let vote: Vote | undefined = slang.votes.find(
+      (vote) => vote.user.id === currentUser.id
+    );
+    if (type === VoteType.VOID) {
+      if (!vote) return slang;
+      else {
+        await this.votesRepository.remove(vote);
+        slang.votes = slang.votes.filter(
+          (vote) => vote.user.id !== currentUser.id
+        );
+
+        await this.meiliIndex.updateDocuments([slang]);
+        return slang;
+      }
+    }
+    if (!vote) {
+      vote = new Vote({ user: currentUser, type });
+      await this.votesRepository.save(vote);
+
+      slang.votes.push(vote);
+      await this.slangsRepository.save(slang);
+      await this.meiliIndex.updateDocuments([slang]);
+
+      return slang;
+    }
+    if (vote.type === type) return slang;
+
+    vote.type = type;
+    await this.votesRepository.save(vote);
+
+    await this.meiliIndex.updateDocuments([slang]);
     return slang;
   }
 }

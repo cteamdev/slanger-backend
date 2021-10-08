@@ -1,9 +1,16 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
-import { Entity, Column, PrimaryGeneratedColumn, ManyToOne } from 'typeorm';
+import {
+  Entity,
+  Column,
+  PrimaryGeneratedColumn,
+  ManyToOne,
+  OneToMany
+} from 'typeorm';
 
 import { User } from '@/users/entities/user.entity';
 import { SlangStatus } from '../types/slang-status.types';
 import { SlangType } from '../types/slang-type.types';
+import { Vote } from './vote.entity';
 
 @Entity()
 export class Slang {
@@ -30,6 +37,10 @@ export class Slang {
   @Column()
   @ApiProperty()
   description: string;
+
+  @OneToMany(() => Vote, (vote) => vote.slang)
+  @ApiProperty({ type: () => Vote })
+  votes: Vote[];
 
   @Column()
   @ApiProperty()

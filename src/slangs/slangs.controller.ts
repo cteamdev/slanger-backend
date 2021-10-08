@@ -16,6 +16,7 @@ import { Slang } from './entities/slang.entity';
 import { CreateSlangDto } from './dto/create-slang.dto';
 import { EditSlangDto } from './dto/edit-slang.dto';
 import { DeleteSlangDto } from './dto/delete-slang.dto';
+import { VoteSlangDto } from './dto/vote-slang.dto';
 
 @Controller('slangs')
 @ApiCookieAuth('x-vk')
@@ -57,5 +58,16 @@ export class SlangsController {
     @Body() body: DeleteSlangDto
   ): Promise<Slang | undefined> {
     return this.slangsService.delete(currentUser, body);
+  }
+
+  @Post('/vote')
+  @ApiResponse({ status: 200, type: Slang })
+  @ApiNotFoundResponse()
+  @ApiBadRequestResponse()
+  vote(
+    @CurrentUser() currentUser: User,
+    @Body() body: VoteSlangDto
+  ): Promise<Slang | undefined> {
+    return this.slangsService.vote(currentUser, body);
   }
 }
