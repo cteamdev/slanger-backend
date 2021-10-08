@@ -30,7 +30,7 @@ export class Slang {
 
   @Column({ nullable: true })
   @ApiPropertyOptional()
-  cover: string | null;
+  cover?: string;
 
   @Column()
   @ApiProperty()

@@ -18,7 +18,7 @@ export class CreateSlangDto {
     minLength: 1,
     maxLength: 200
   })
-  cover: string | null;
+  cover?: string;
 
   @IsString()
   @Length(1, 40)

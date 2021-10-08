@@ -1,7 +1,7 @@
 import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { InjectMeiliSearch } from 'nestjs-meilisearch';
-import { MeiliSearch, Index } from 'meilisearch';
+import { MeiliSearch, Index, SearchResponse } from 'meilisearch';
 import { Repository } from 'typeorm';
 import { stripIndents } from 'common-tags';
 import { formatRelative } from 'date-fns';
@@ -13,11 +13,12 @@ import { User } from '@/users/entities/user.entity';
 import { Slang } from './entities/slang.entity';
 import { Vote } from './entities/vote.entity';
 import { SlangStatus } from './types/slang-status.types';
+import { VoteType } from './types/vote-type.types';
 import { CreateSlangDto } from './dto/create-slang.dto';
 import { EditSlangDto } from './dto/edit-slang.dto';
 import { DeleteSlangDto } from './dto/delete-slang.dto';
 import { VoteSlangDto } from './dto/vote-slang.dto';
-import { VoteType } from './types/vote-type.types';
+import { SearchDto } from './dto/search.dto';
 
 @Injectable()
 export class SlangsService {
@@ -34,6 +35,32 @@ export class SlangsService {
     @InjectRepository(Vote)
     private readonly votesRepository: Repository<Vote>
   ) {}
+
+  async search({
+    q,
+    offset,
+    limit
+  }: SearchDto): Promise<SearchResponse<Slang>> {
+    /*
+     curl \
+      -X POST 'http://localhost:7700/indexes/slangs/settings' \
+      --data '{
+          "filterableAttributes": [
+              "status"
+          ],
+          "sortableAttributes": [
+            "date"
+          ]
+      }'
+     */
+
+    return this.meiliIndex.search(q, {
+      offset,
+      limit,
+      filter: ['status = public'],
+      sort: ['date:desc']
+    });
+  }
 
   async myVote(currentUser: User, id: number): Promise<Vote | undefined> {
     const slang: Slang | undefined = await this.slangsRepository.findOne(

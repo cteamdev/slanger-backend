@@ -14,23 +14,31 @@ import {
   ApiResponse,
   ApiTags
 } from '@nestjs/swagger';
+import { SearchResponse } from 'meilisearch';
 
 import { CurrentUser } from '@/common/decorators/current-user.decorator';
 import { Groups } from '@/common/types/groups.types';
 import { User } from '@/users/entities/user.entity';
 import { SlangsService } from './slangs.service';
 import { Slang } from './entities/slang.entity';
+import { Vote } from './entities/vote.entity';
 import { CreateSlangDto } from './dto/create-slang.dto';
 import { EditSlangDto } from './dto/edit-slang.dto';
 import { DeleteSlangDto } from './dto/delete-slang.dto';
 import { VoteSlangDto } from './dto/vote-slang.dto';
-import { Vote } from './entities/vote.entity';
+import { SearchDto } from './dto/search.dto';
 
 @Controller('slangs')
 @ApiCookieAuth('x-vk')
 @ApiTags('Слэнги')
 export class SlangsController {
   constructor(private readonly slangsService: SlangsService) {}
+
+  @Get('/search')
+  @ApiResponse({ status: 200 })
+  search(@Query() query: SearchDto): Promise<SearchResponse<Slang>> {
+    return this.slangsService.search(query);
+  }
 
   @Get('/myVote')
   @ApiResponse({ status: 200, type: Vote })
