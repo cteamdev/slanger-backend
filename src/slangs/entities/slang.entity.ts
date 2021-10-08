@@ -51,9 +51,6 @@ export class Slang {
   @ApiProperty({ type: 'number' })
   votes: Vote[];
 
-  @ApiProperty()
-  myVote: VoteType;
-
   @Column()
   @ApiProperty()
   status: SlangStatus = SlangStatus.MODERATING;
