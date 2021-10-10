@@ -13,6 +13,7 @@ import { SlangStatus } from '@/slangs/types/slang-status.types';
 import { SearchDto } from './dto/search.dto';
 import { SetSlangStatusDto } from './dto/set-slang-status.dto';
 import { SetUserRightsDto } from './dto/set-user-rights.dto';
+import { SlangType } from '@/slangs/types/slang-type.types';
 
 @Injectable()
 export class AdminService {
@@ -61,10 +62,37 @@ export class AdminService {
     await this.meiliIndex.updateDocuments([slang]);
 
     if (slang.user) {
+      const points = {
+        [SlangType.WORD]: 8,
+        [SlangType.COLLOCATION]: 10,
+        [SlangType.PROVERB]: 12,
+        [SlangType.PHRASEOLOGICAL_UNIT]: 12
+      };
+
+      if (status === SlangStatus.PUBLIC) {
+        slang.user.points += points[slang.type];
+
+        await this.usersRepository.save(slang.user);
+      }
+
       const ru = {
         [SlangStatus.MODERATING]: 'на модерации',
         [SlangStatus.DECLINED]: 'отклонён модерацией',
-        [SlangStatus.PUBLIC]: 'опубликован'
+        [SlangStatus.PUBLIC]:
+          'опубликован, вам ' +
+          this.helpersService.pluralize(points[slang.type], [
+            'начислен',
+            'начислено',
+            'начислено'
+          ]) +
+          ' ' +
+          points[slang.type] +
+          ' ' +
+          this.helpersService.pluralize(points[slang.type], [
+            'балл',
+            'балла',
+            'баллов'
+          ])
       };
 
       this.usersService.sendNotification({
