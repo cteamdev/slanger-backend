@@ -14,7 +14,8 @@ export class AppService implements OnModuleInit {
     // Настройка MeiliSearch
     await this.meiliIndex.updateSettings({
       filterableAttributes: ['status'],
-      sortableAttributes: ['date']
+      sortableAttributes: ['date'],
+      searchableAttributes: ['type', 'cover', 'word', 'description']
     });
   }
 }
