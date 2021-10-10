@@ -20,6 +20,7 @@ import { User } from '@/users/entities/user.entity';
 import { Settings } from '@/users/entities/settings.entity';
 import { SlangsModule } from './slangs/slangs.module';
 import { BookmarksModule } from './bookmarks/bookmarks.module';
+import { AdminModule } from './admin/admin.module';
 
 @Module({
   imports: [
@@ -64,7 +65,8 @@ import { BookmarksModule } from './bookmarks/bookmarks.module';
     HelpersModule,
     UsersModule,
     SlangsModule,
-    BookmarksModule
+    BookmarksModule,
+    AdminModule
   ],
   providers: [
     {

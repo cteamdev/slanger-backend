@@ -77,6 +77,7 @@ export class UsersService {
         message +
           '\nПодробнее: ' +
           this.helpersService.getConfig('APP_URL') +
+          '#' +
           hash
       );
   }
