@@ -41,19 +41,6 @@ export class SlangsService {
     offset,
     limit
   }: SearchDto): Promise<SearchResponse<Slang>> {
-    /*
-     curl \
-      -X POST 'http://localhost:7700/indexes/slangs/settings' \
-      --data '{
-          "filterableAttributes": [
-              "status"
-          ],
-          "sortableAttributes": [
-            "date"
-          ]
-      }'
-     */
-
     return this.meiliIndex.search(q, {
       offset,
       limit,

@@ -15,12 +15,13 @@ import { ThrottlerGuard } from '@/common/guards/trottler.guard';
 import { ThrottlerStorageModule } from '@/common/throttler/throttler-storage.module';
 import { ThrottlerStorageService } from '@/common/throttler/throttler-storage.service';
 
+import { AppService } from '@/app.service';
 import { UsersModule } from '@/users/users.module';
 import { User } from '@/users/entities/user.entity';
 import { Settings } from '@/users/entities/settings.entity';
-import { SlangsModule } from './slangs/slangs.module';
-import { BookmarksModule } from './bookmarks/bookmarks.module';
-import { AdminModule } from './admin/admin.module';
+import { SlangsModule } from '@/slangs/slangs.module';
+import { BookmarksModule } from '@/bookmarks/bookmarks.module';
+import { AdminModule } from '@/admin/admin.module';
 
 @Module({
   imports: [
@@ -69,6 +70,7 @@ import { AdminModule } from './admin/admin.module';
     AdminModule
   ],
   providers: [
+    AppService,
     {
       provide: APP_GUARD,
       useClass: ThrottlerGuard
