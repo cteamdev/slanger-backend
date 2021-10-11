@@ -249,11 +249,18 @@ export class SlangsService {
     return slang;
   }
 
-  @Cron('20 * * * * *', {
+  @Cron('1 0 0 * * *', {
+    name: 'calcDaySlang',
     timeZone: 'Europe/Moscow'
   })
   async calcDaySlang(): Promise<void> {
     this.logger.log('Подсчёт слова дня...');
+
+    const foundDaySlang: DaySlang | undefined =
+      await this.daySlangRepository.findOne({
+        dateString: new Date().toDateString()
+      });
+    if (foundDaySlang) return;
 
     const today: Date = new Date(new Date().toDateString());
     const tomorrow: Date = new Date(
