@@ -1,6 +1,7 @@
 import { APP_GUARD, APP_INTERCEPTOR, APP_PIPE } from '@nestjs/core';
 import { Module, ClassSerializerInterceptor } from '@nestjs/common';
 import { ConfigModule, ConfigService } from '@nestjs/config';
+import { ScheduleModule } from '@nestjs/schedule';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { ThrottlerModule } from '@nestjs/throttler';
 import { MeiliSearchModule } from 'nestjs-meilisearch';
@@ -26,6 +27,7 @@ import { AdminModule } from '@/admin/admin.module';
 @Module({
   imports: [
     ConfigModule.forRoot(),
+    ScheduleModule.forRoot(),
     TypeOrmModule.forRootAsync({
       imports: [ConfigModule],
       useFactory: async (configService: ConfigService) => ({
@@ -61,6 +63,7 @@ import { AdminModule } from '@/admin/admin.module';
         apiKey: configService.get('MEILI_MASTER_KEY')
       })
     }),
+
     TypeOrmModule.forFeature([User, Settings]),
     CacheModule,
     HelpersModule,

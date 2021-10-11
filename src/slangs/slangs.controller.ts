@@ -40,14 +40,21 @@ export class SlangsController {
     return this.slangsService.search(query);
   }
 
-  @Get('/myVote')
+  @Get('/getDaySlang')
+  @ApiResponse({ status: 200, type: Slang })
+  @ApiNotFoundResponse()
+  getDaySlang(): Promise<Slang | undefined> {
+    return this.slangsService.getDaySlang();
+  }
+
+  @Get('/getVote')
   @ApiResponse({ status: 200, type: Vote })
   @ApiNotFoundResponse()
-  myVote(
+  getVote(
     @CurrentUser() currentUser: User,
     @Query('id') id: number
   ): Promise<Vote | undefined> {
-    return this.slangsService.myVote(currentUser, id);
+    return this.slangsService.getVote(currentUser, id);
   }
 
   @Post('/create')

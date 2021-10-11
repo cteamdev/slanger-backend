@@ -1,8 +1,9 @@
-import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
+import { HttpException, HttpStatus, Injectable, Logger } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
+import { Cron } from '@nestjs/schedule';
 import { InjectMeiliSearch } from 'nestjs-meilisearch';
 import { MeiliSearch, Index, SearchResponse } from 'meilisearch';
-import { Repository } from 'typeorm';
+import { Between, Repository } from 'typeorm';
 import { stripIndents } from 'common-tags';
 import { formatRelative } from 'date-fns';
 import { ru } from 'date-fns/locale';
@@ -11,6 +12,7 @@ import { HelpersService } from '@/common/helpers/helpers.service';
 import { Rights } from '@/common/types/rights.types';
 import { User } from '@/users/entities/user.entity';
 import { Slang } from './entities/slang.entity';
+import { DaySlang } from './entities/day-slang.entity';
 import { Vote } from './entities/vote.entity';
 import { SlangStatus } from './types/slang-status.types';
 import { VoteType } from './types/vote-type.types';
@@ -22,6 +24,7 @@ import { SearchDto } from './dto/search.dto';
 
 @Injectable()
 export class SlangsService {
+  private readonly logger: Logger = new Logger(SlangsService.name);
   private readonly meiliIndex: Index<Slang> =
     this.meiliSearch.index<Slang>('slangs');
 
@@ -32,6 +35,8 @@ export class SlangsService {
     private readonly usersRepository: Repository<User>,
     @InjectRepository(Slang)
     private readonly slangsRepository: Repository<Slang>,
+    @InjectRepository(DaySlang)
+    private readonly daySlangRepository: Repository<DaySlang>,
     @InjectRepository(Vote)
     private readonly votesRepository: Repository<Vote>
   ) {}
@@ -49,7 +54,27 @@ export class SlangsService {
     });
   }
 
-  async myVote(currentUser: User, id: number): Promise<Vote | undefined> {
+  async getDaySlang(): Promise<Slang | undefined> {
+    const daySlang: DaySlang | undefined =
+      await this.daySlangRepository.findOne(
+        {
+          dateString: new Date().toDateString()
+        },
+        {
+          relations: [
+            'slang',
+            ...this.helpersService
+              .getSlangRelations()
+              .map((rel) => 'slang.' + rel)
+          ]
+        }
+      );
+    if (!daySlang) return;
+
+    return daySlang.slang;
+  }
+
+  async getVote(currentUser: User, id: number): Promise<Vote | undefined> {
     const slang: Slang | undefined = await this.slangsRepository.findOne(
       {
         id
@@ -222,5 +247,42 @@ export class SlangsService {
 
     await this.meiliIndex.updateDocuments([slang]);
     return slang;
+  }
+
+  @Cron('20 * * * * *', {
+    timeZone: 'Europe/Moscow'
+  })
+  async calcDaySlang(): Promise<void> {
+    this.logger.log('Подсчёт слова дня...');
+
+    const today: Date = new Date(new Date().toDateString());
+    const tomorrow: Date = new Date(
+      new Date(Date.now() + 24 * 60 * 60 * 1000).toDateString()
+    );
+    const slangs: Slang[] = await this.slangsRepository.find({
+      where: {
+        status: SlangStatus.PUBLIC,
+        date: Between(today, tomorrow)
+      },
+      relations: ['votes']
+    });
+
+    type CountSlang = { slang: Slang; votes: number };
+
+    const map: CountSlang[] = slangs.map((slang) => ({
+      slang,
+      votes:
+        slang.votes.length > 0
+          ? slang.votes
+              .map((vote) => (vote.type === VoteType.DOWN ? -1 : 1) as number)
+              .reduce((pv, cv) => pv + cv)
+          : 0
+    }));
+    const sort: CountSlang[] = map.sort((a, b) => b.votes - a.votes);
+
+    const slang: Slang = sort[0].slang;
+    const daySlang: DaySlang = new DaySlang({ slang });
+
+    await this.daySlangRepository.save(daySlang);
   }
 }
