@@ -49,11 +49,11 @@ export class User {
   dayLimitCount: number = 0;
 
   @OneToMany(() => Slang, (slang) => slang.user)
-  @ApiProperty({ type: [Slang] })
+  @ApiPropertyOptional({ type: [Slang] })
   slangs: Slang[];
 
   @OneToMany(() => Bookmark, (bookmark) => bookmark.user)
-  @ApiProperty({ type: [Bookmark] })
+  @ApiPropertyOptional({ type: [Bookmark] })
   bookmarks: Bookmark[];
 
   @JoinColumn()

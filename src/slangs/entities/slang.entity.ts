@@ -25,7 +25,7 @@ export class Slang {
   user: User | null;
 
   @Column()
-  @ApiProperty()
+  @ApiProperty({ enum: SlangType })
   type: SlangType;
 
   @Column({ nullable: true })
@@ -52,7 +52,7 @@ export class Slang {
   votes: Vote[];
 
   @Column()
-  @ApiProperty()
+  @ApiProperty({ enum: SlangStatus })
   status: SlangStatus = SlangStatus.MODERATING;
 
   @Column('timestamp')
