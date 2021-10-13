@@ -21,11 +21,11 @@ export class CreateSlangDto {
   cover?: string;
 
   @IsString()
-  @Length(1, 40)
+  @Length(1, 250)
   @TransformZalgo()
   @ApiProperty({
     minLength: 1,
-    maxLength: 40
+    maxLength: 250
   })
   word: string;
 
