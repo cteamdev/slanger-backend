@@ -31,6 +31,7 @@ export class HelpersService {
       'slangs.votes.user',
       'bookmarks',
       'bookmarks.slang',
+      'bookmarks.slang.user',
       'bookmarks.slang.votes',
       'bookmarks.slang.votes.user',
       'settings'
@@ -42,7 +43,7 @@ export class HelpersService {
   }
 
   getBookmarkRelations(): string[] {
-    return ['user', 'slang', 'slang.votes', 'slang.votes.user'];
+    return ['user', 'slang', 'slang.user', 'slang.votes', 'slang.votes.user'];
   }
 
   /**
