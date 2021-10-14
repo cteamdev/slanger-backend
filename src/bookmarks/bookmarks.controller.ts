@@ -1,4 +1,4 @@
-import { Controller, Post, Body, SerializeOptions } from '@nestjs/common';
+import { Controller, Post, Body, SerializeOptions, Get } from '@nestjs/common';
 import {
   ApiBadRequestResponse,
   ApiCookieAuth,
@@ -15,12 +15,24 @@ import { BookmarksService } from './bookmarks.service';
 import { Bookmark } from './entities/bookmark.entity';
 import { CreateBookmarkDto } from './dto/create-bookmark.dto';
 import { RemoveBookmarkDto } from './dto/remove-bookmark.dto';
+import { HasBookmarkDto } from './dto/has-bookmark.dto';
 
 @Controller('bookmarks')
 @ApiCookieAuth('x-vk')
 @ApiTags('Закладки')
 export class BookmarksController {
   constructor(private readonly bookmarksService: BookmarksService) {}
+
+  @Get('/has')
+  @SerializeOptions({ groups: [Groups.CURRENT_USER] })
+  @ApiResponse({ status: 200, type: Bookmark })
+  @ApiNotFoundResponse()
+  has(
+    @CurrentUser() currentUser: User,
+    @Body() body: HasBookmarkDto
+  ): Promise<Bookmark | undefined> {
+    return this.bookmarksService.has(currentUser, body);
+  }
 
   @Post('/create')
   @SerializeOptions({ groups: [Groups.CURRENT_USER] })

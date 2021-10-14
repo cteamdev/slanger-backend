@@ -8,6 +8,7 @@ import { Slang } from '@/slangs/entities/slang.entity';
 import { Bookmark } from './entities/bookmark.entity';
 import { CreateBookmarkDto } from './dto/create-bookmark.dto';
 import { RemoveBookmarkDto } from './dto/remove-bookmark.dto';
+import { HasBookmarkDto } from './dto/has-bookmark.dto';
 
 @Injectable()
 export class BookmarksService {
@@ -18,6 +19,25 @@ export class BookmarksService {
     @InjectRepository(Bookmark)
     private readonly bookmarksRepository: Repository<Bookmark>
   ) {}
+
+  async has(
+    currentUser: User,
+    { slangId }: HasBookmarkDto
+  ): Promise<Bookmark | undefined> {
+    return this.bookmarksRepository.findOne(
+      {
+        slang: {
+          id: slangId
+        },
+        user: {
+          id: currentUser.id
+        }
+      },
+      {
+        relations: this.helpersService.getBookmarkRelations()
+      }
+    );
+  }
 
   async create(
     currentUser: User,
