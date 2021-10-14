@@ -1,8 +1,6 @@
 import {
   CallHandler,
   ExecutionContext,
-  HttpException,
-  HttpStatus,
   Inject,
   Injectable,
   NestInterceptor,
@@ -27,11 +25,7 @@ export class VKInterceptor implements NestInterceptor {
       // Ищем все поля `vk` и заменяем их
       // С массивами это тоже работает
       map((data: PlainLiteralObject) =>
-        data
-          ? data instanceof Object
-            ? this.findAndReplace(data)
-            : data
-          : new HttpException('Не найдено', HttpStatus.NOT_FOUND)
+        data instanceof Object ? this.findAndReplace(data) : data
       )
     );
   }

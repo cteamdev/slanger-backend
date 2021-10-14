@@ -55,7 +55,7 @@ export class AdminService {
         relations: this.helpersService.getSlangRelations()
       }
     );
-    if (!slang) return;
+    if (!slang) throw new HttpException('Не найдено', HttpStatus.NOT_FOUND);
 
     slang.status = status;
     await this.slangsRepository.save(slang);
@@ -110,7 +110,7 @@ export class AdminService {
     rights
   }: SetUserRightsDto): Promise<User | undefined> {
     const user: User | undefined = await this.usersRepository.findOne({ id });
-    if (!user) return;
+    if (!user) throw new HttpException('Не найдено', HttpStatus.NOT_FOUND);
 
     if (user.rights >= Rights.ADMIN)
       throw new HttpException(

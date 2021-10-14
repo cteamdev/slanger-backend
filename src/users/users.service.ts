@@ -1,4 +1,10 @@
-import { CACHE_MANAGER, Inject, Injectable } from '@nestjs/common';
+import {
+  CACHE_MANAGER,
+  HttpException,
+  HttpStatus,
+  Inject,
+  Injectable
+} from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { Cache } from 'cache-manager';
@@ -35,7 +41,8 @@ export class UsersService {
       { id: currentUser.id },
       { relations: this.helpersService.getUserRelations() }
     );
-    if (!relationsUser) return;
+    if (!relationsUser)
+      throw new HttpException('Не найдено', HttpStatus.NOT_FOUND);
 
     Object.assign(relationsUser.settings, body);
     relationsUser.settings = await this.settingsRepository.save(
@@ -63,7 +70,8 @@ export class UsersService {
           { id: user.id },
           { relations: this.helpersService.getUserRelations() }
         );
-      if (!relationsUser) return;
+      if (!relationsUser)
+        throw new HttpException('Не найдено', HttpStatus.NOT_FOUND);
 
       user = relationsUser;
     }

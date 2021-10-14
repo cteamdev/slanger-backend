@@ -50,7 +50,7 @@ export class BookmarksService {
     const slang: Slang | undefined = await this.slangsRepository.findOne({
       id: slangId
     });
-    if (!slang) return;
+    if (!slang) throw new HttpException('Не найдено', HttpStatus.NOT_FOUND);
 
     const foundBookmark: Bookmark | undefined =
       await this.bookmarksRepository.findOne({ slang: { id: slangId } });
@@ -80,7 +80,7 @@ export class BookmarksService {
           relations: this.helpersService.getBookmarkRelations()
         }
       );
-    if (!bookmark) return;
+    if (!bookmark) throw new HttpException('Не найдено', HttpStatus.NOT_FOUND);
 
     if (bookmark.user.id !== currentUser.id)
       throw new HttpException('Доступ запрещён', HttpStatus.FORBIDDEN);

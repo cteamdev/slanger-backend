@@ -83,7 +83,7 @@ export class SlangsService {
         relations: this.helpersService.getSlangRelations()
       }
     );
-    if (!slang) return;
+    if (!slang) throw new HttpException('Не найдено', HttpStatus.NOT_FOUND);
 
     const vote: Vote | undefined = slang.votes.find(
       (vote) => vote.user.id === currentUser.id
@@ -149,7 +149,7 @@ export class SlangsService {
         relations: this.helpersService.getSlangRelations()
       }
     );
-    if (!slang) return;
+    if (!slang) throw new HttpException('Не найдено', HttpStatus.NOT_FOUND);
 
     if (!slang.user || slang.user.id !== currentUser.id)
       throw new HttpException('Доступ запрещён', HttpStatus.FORBIDDEN);
@@ -179,7 +179,7 @@ export class SlangsService {
         relations: this.helpersService.getSlangRelations()
       }
     );
-    if (!slang) return;
+    if (!slang) throw new HttpException('Не найдено', HttpStatus.NOT_FOUND);
 
     if (!slang.user || slang.user.id !== currentUser.id)
       throw new HttpException('Доступ запрещён', HttpStatus.FORBIDDEN);
@@ -202,7 +202,7 @@ export class SlangsService {
         relations: this.helpersService.getSlangRelations()
       }
     );
-    if (!slang) return;
+    if (!slang) throw new HttpException('Не найдено', HttpStatus.NOT_FOUND);
 
     if (slang.user && slang.user.id === currentUser.id)
       throw new HttpException(
