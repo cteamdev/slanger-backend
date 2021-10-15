@@ -15,6 +15,7 @@ import {
   ApiTags
 } from '@nestjs/swagger';
 import { SearchResponse } from 'meilisearch';
+import { classToPlain } from 'class-transformer';
 
 import { CurrentUser } from '@/common/decorators/current-user.decorator';
 import { Groups } from '@/common/types/groups.types';
@@ -38,6 +39,22 @@ export class SlangsController {
   @ApiResponse({ status: 200 })
   search(@Query() query: SearchDto): Promise<SearchResponse<Slang>> {
     return this.slangsService.search(query);
+  }
+
+  @Get('/getById')
+  @ApiResponse({ status: 200, type: Slang })
+  @ApiNotFoundResponse()
+  async getById(
+    @CurrentUser() currentUser: User,
+    @Query('id') id: number
+  ): Promise<Slang> {
+    const slang: Slang = await this.slangsService.getById(id);
+
+    return slang.user?.id === currentUser.id
+      ? (classToPlain(slang, {
+          groups: [Groups.CURRENT_USER]
+        }) as Slang)
+      : slang;
   }
 
   @Get('/getDaySlang')

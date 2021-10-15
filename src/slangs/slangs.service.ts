@@ -54,6 +54,20 @@ export class SlangsService {
     });
   }
 
+  async getById(id: number): Promise<Slang> {
+    const slang: Slang | undefined = await this.slangsRepository.findOne(
+      {
+        id
+      },
+      {
+        relations: this.helpersService.getSlangRelations()
+      }
+    );
+    if (!slang) throw new HttpException('Не найдено', HttpStatus.NOT_FOUND);
+
+    return slang;
+  }
+
   async getDaySlang(): Promise<Slang | undefined> {
     const daySlang: DaySlang | undefined =
       await this.daySlangRepository.findOne(
