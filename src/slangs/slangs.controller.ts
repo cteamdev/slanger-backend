@@ -22,11 +22,9 @@ import { Groups } from '@/common/types/groups.types';
 import { User } from '@/users/entities/user.entity';
 import { SlangsService } from './slangs.service';
 import { Slang } from './entities/slang.entity';
-import { Vote } from './entities/vote.entity';
 import { CreateSlangDto } from './dto/create-slang.dto';
 import { EditSlangDto } from './dto/edit-slang.dto';
 import { DeleteSlangDto } from './dto/delete-slang.dto';
-import { VoteSlangDto } from './dto/vote-slang.dto';
 import { SearchDto } from './dto/search.dto';
 
 @Controller('slangs')
@@ -57,21 +55,10 @@ export class SlangsController {
       : slang;
   }
 
-  @Get('/getDaySlang')
+  @Get('/getRandom')
   @ApiResponse({ status: 200, type: Slang })
-  @ApiNotFoundResponse()
-  getDaySlang(): Promise<Slang | undefined> {
-    return this.slangsService.getDaySlang();
-  }
-
-  @Get('/getVote')
-  @ApiResponse({ status: 200, type: Vote })
-  @ApiNotFoundResponse()
-  getVote(
-    @CurrentUser() currentUser: User,
-    @Query('id') id: number
-  ): Promise<Vote | undefined> {
-    return this.slangsService.getVote(currentUser, id);
+  getRandom(): Promise<Slang | undefined> {
+    return this.slangsService.getRandom();
   }
 
   @Post('/create')
@@ -108,16 +95,5 @@ export class SlangsController {
     @Body() body: DeleteSlangDto
   ): Promise<Slang | undefined> {
     return this.slangsService.delete(currentUser, body);
-  }
-
-  @Post('/vote')
-  @ApiResponse({ status: 200, type: Slang })
-  @ApiNotFoundResponse()
-  @ApiBadRequestResponse()
-  vote(
-    @CurrentUser() currentUser: User,
-    @Body() body: VoteSlangDto
-  ): Promise<Slang | undefined> {
-    return this.slangsService.vote(currentUser, body);
   }
 }

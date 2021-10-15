@@ -24,22 +24,15 @@ export class HelpersService {
   }
 
   getUserRelations(): string[] {
-    return [
-      'bookmarks',
-      'bookmarks.slang',
-      'bookmarks.slang.user',
-      'bookmarks.slang.votes',
-      'bookmarks.slang.votes.user',
-      'settings'
-    ];
+    return ['bookmarks', 'bookmarks.slang', 'bookmarks.slang.user', 'settings'];
   }
 
   getSlangRelations(): string[] {
-    return ['user', 'votes', 'votes.user'];
+    return ['user'];
   }
 
   getBookmarkRelations(): string[] {
-    return ['user', 'slang', 'slang.user', 'slang.votes', 'slang.votes.user'];
+    return ['user', 'slang', 'slang.user'];
   }
 
   /**
