@@ -25,10 +25,6 @@ export class HelpersService {
 
   getUserRelations(): string[] {
     return [
-      'slangs',
-      'slangs.user',
-      'slangs.votes',
-      'slangs.votes.user',
       'bookmarks',
       'bookmarks.slang',
       'bookmarks.slang.user',
