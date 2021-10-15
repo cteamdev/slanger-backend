@@ -26,11 +26,14 @@ export class UsersService {
     private readonly settingsRepository: Repository<Settings>
   ) {}
 
-  getById(id: number): Promise<User | undefined> {
-    return this.usersRepository.findOne(
+  async getById(id: number): Promise<User> {
+    const user: User | undefined = await this.usersRepository.findOne(
       { id },
       { relations: this.helpersService.getUserRelations() }
     );
+    if (!user) throw new HttpException('Не найдено', HttpStatus.NOT_FOUND);
+
+    return user;
   }
 
   async setSettings(
