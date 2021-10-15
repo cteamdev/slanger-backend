@@ -132,7 +132,7 @@ export class UsersService {
         ({
           id: user.id,
           avatarUrl: user.photo_400 ?? '',
-          verified: user.verified ?? false,
+          verified: !!user.verified,
           fullName: user.first_name + ' ' + user.last_name
         } as VKInfoDto)
     );
