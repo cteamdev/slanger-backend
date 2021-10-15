@@ -99,8 +99,14 @@ export class SlangsService {
     );
     await this.meiliIndex.addDocuments([slang]);
 
-    currentUser.dayLimitCount++;
-    currentUser.dayLimitDate = new Date();
+    if (
+      !currentUser.dayLimitDate ||
+      currentUser.dayLimitDate.toDateString() !== new Date().toDateString()
+    ) {
+      currentUser.dayLimitDate = new Date();
+      currentUser.dayLimitCount = 1;
+    } else currentUser.dayLimitCount++;
+
     await this.usersRepository.save(currentUser);
 
     const format: string = formatRelative(slang.date, new Date(), {
