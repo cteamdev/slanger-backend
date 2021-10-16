@@ -26,6 +26,7 @@ import { CreateSlangDto } from './dto/create-slang.dto';
 import { EditSlangDto } from './dto/edit-slang.dto';
 import { DeleteSlangDto } from './dto/delete-slang.dto';
 import { SearchDto } from './dto/search.dto';
+import { GetOwnDto } from './dto/get-own.dto';
 
 @Controller('slangs')
 @ApiCookieAuth('x-vk')
@@ -53,6 +54,16 @@ export class SlangsController {
           groups: [Groups.CURRENT_USER]
         }) as Slang)
       : slang;
+  }
+
+  @Get('/getOwn')
+  @SerializeOptions({ groups: [Groups.CURRENT_USER] })
+  @ApiResponse({ status: 200, type: [Slang] })
+  getOwn(
+    @CurrentUser() currentUser: User,
+    @Query() query: GetOwnDto
+  ): Promise<SearchResponse<Slang>> {
+    return this.slangsService.getOwn(currentUser, query);
   }
 
   @Get('/getRandom')

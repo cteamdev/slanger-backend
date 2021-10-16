@@ -10,10 +10,11 @@ import { UsersService } from '@/users/users.service';
 import { User } from '@/users/entities/user.entity';
 import { Slang } from '@/slangs/entities/slang.entity';
 import { SlangStatus } from '@/slangs/types/slang-status.types';
+import { SlangType } from '@/slangs/types/slang-type.types';
+import { SlangMeili } from '@/slangs/types/slang-meili.types';
 import { SearchDto } from './dto/search.dto';
 import { SetSlangStatusDto } from './dto/set-slang-status.dto';
 import { SetUserRightsDto } from './dto/set-user-rights.dto';
-import { SlangType } from '@/slangs/types/slang-type.types';
 
 @Injectable()
 export class AdminService {
@@ -59,7 +60,9 @@ export class AdminService {
 
     slang.status = status;
     await this.slangsRepository.save(slang);
-    await this.meiliIndex.updateDocuments([slang]);
+    await this.meiliIndex.updateDocuments([
+      { ...slang, userId: slang.user?.id } as SlangMeili
+    ]);
 
     if (slang.user) {
       const points = {

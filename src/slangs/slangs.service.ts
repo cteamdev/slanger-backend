@@ -12,16 +12,18 @@ import { Rights } from '@/common/types/rights.types';
 import { User } from '@/users/entities/user.entity';
 import { Slang } from './entities/slang.entity';
 import { SlangStatus } from './types/slang-status.types';
+import { SlangMeili } from './types/slang-meili.types';
 import { CreateSlangDto } from './dto/create-slang.dto';
 import { EditSlangDto } from './dto/edit-slang.dto';
 import { DeleteSlangDto } from './dto/delete-slang.dto';
 import { SearchDto } from './dto/search.dto';
+import { GetOwnDto } from './dto/get-own.dto';
 
 @Injectable()
 export class SlangsService {
   private readonly logger: Logger = new Logger(SlangsService.name);
   private readonly meiliIndex: Index<Slang> =
-    this.meiliSearch.index<Slang>('slangs');
+    this.meiliSearch.index<SlangMeili>('slangs');
 
   constructor(
     private readonly helpersService: HelpersService,
@@ -57,6 +59,18 @@ export class SlangsService {
     if (!slang) throw new HttpException('Не найдено', HttpStatus.NOT_FOUND);
 
     return slang;
+  }
+
+  async getOwn(
+    currentUser: User,
+    { offset, limit }: GetOwnDto
+  ): Promise<SearchResponse<Slang>> {
+    return this.meiliIndex.search('', {
+      offset,
+      limit,
+      filter: ['userId = ' + currentUser.id],
+      sort: ['date:desc']
+    });
   }
 
   async getRandom(): Promise<Slang | undefined> {
@@ -97,7 +111,9 @@ export class SlangsService {
     const slang: Slang = await this.slangsRepository.save(
       new Slang({ ...body, user: currentUser })
     );
-    await this.meiliIndex.addDocuments([slang]);
+    await this.meiliIndex.addDocuments([
+      { ...slang, userId: slang.user?.id } as SlangMeili
+    ]);
 
     if (
       !currentUser.dayLimitDate ||
@@ -156,7 +172,9 @@ export class SlangsService {
     Object.assign(slang, body);
     await this.slangsRepository.save(slang);
 
-    await this.meiliIndex.updateDocuments([slang]);
+    await this.meiliIndex.updateDocuments([
+      { ...slang, userId: slang.user?.id } as SlangMeili
+    ]);
 
     return slang;
   }
