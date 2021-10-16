@@ -21,7 +21,17 @@ export class AppService implements OnModuleInit {
     await this.meiliIndex.updateSettings({
       filterableAttributes: ['status', 'userId'],
       sortableAttributes: ['date'],
-      searchableAttributes: ['type', 'cover', 'word', 'description']
+      searchableAttributes: ['type', 'cover', 'word', 'description'],
+      displayedAttributes: [
+        'id',
+        'user',
+        'type',
+        'cover',
+        'word',
+        'description',
+        'status',
+        'date'
+      ]
     });
   }
 }
