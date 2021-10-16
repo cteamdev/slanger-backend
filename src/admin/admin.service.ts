@@ -18,8 +18,8 @@ import { SetUserRightsDto } from './dto/set-user-rights.dto';
 
 @Injectable()
 export class AdminService {
-  private readonly meiliIndex: Index<Slang> =
-    this.meiliSearch.index<Slang>('slangs');
+  private readonly meiliIndex: Index<SlangMeili> =
+    this.meiliSearch.index<SlangMeili>('slangs');
 
   constructor(
     private readonly helpersService: HelpersService,
@@ -60,9 +60,7 @@ export class AdminService {
 
     slang.status = status;
     await this.slangsRepository.save(slang);
-    await this.meiliIndex.updateDocuments([
-      { ...slang, userId: slang.user?.id } as SlangMeili
-    ]);
+    await this.meiliIndex.updateDocuments([slang.toMeiliEntity()]);
 
     if (slang.user) {
       const points = {

@@ -22,7 +22,7 @@ import { GetOwnDto } from './dto/get-own.dto';
 @Injectable()
 export class SlangsService {
   private readonly logger: Logger = new Logger(SlangsService.name);
-  private readonly meiliIndex: Index<Slang> =
+  private readonly meiliIndex: Index<SlangMeili> =
     this.meiliSearch.index<SlangMeili>('slangs');
 
   constructor(
@@ -111,9 +111,7 @@ export class SlangsService {
     const slang: Slang = await this.slangsRepository.save(
       new Slang({ ...body, user: currentUser })
     );
-    await this.meiliIndex.addDocuments([
-      { ...slang, userId: slang.user?.id } as SlangMeili
-    ]);
+    await this.meiliIndex.addDocuments([slang.toMeiliEntity()]);
 
     if (
       !currentUser.dayLimitDate ||
@@ -172,9 +170,7 @@ export class SlangsService {
     Object.assign(slang, body);
     await this.slangsRepository.save(slang);
 
-    await this.meiliIndex.updateDocuments([
-      { ...slang, userId: slang.user?.id } as SlangMeili
-    ]);
+    await this.meiliIndex.updateDocuments([slang.toMeiliEntity()]);
 
     return slang;
   }

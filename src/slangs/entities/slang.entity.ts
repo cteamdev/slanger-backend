@@ -4,6 +4,7 @@ import { Entity, Column, PrimaryGeneratedColumn, ManyToOne } from 'typeorm';
 import { User } from '@/users/entities/user.entity';
 import { SlangStatus } from '../types/slang-status.types';
 import { SlangType } from '../types/slang-type.types';
+import { SlangMeili } from '../types/slang-meili.types';
 
 @Entity()
 export class Slang {
@@ -41,5 +42,16 @@ export class Slang {
 
   constructor(options: Partial<Slang>) {
     Object.assign(this, options);
+  }
+
+  toMeiliEntity(): SlangMeili {
+    return {
+      ...this,
+      userId: this.user?.id,
+      user: {
+        id: this.user?.id,
+        vk: this.user?.vk
+      }
+    };
   }
 }
