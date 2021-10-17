@@ -199,7 +199,11 @@ export class SlangsService {
     );
     if (!slang) throw new HttpException('Не найдено', HttpStatus.NOT_FOUND);
 
-    if (!slang.user || slang.user.id !== currentUser.id)
+    const isModerator: boolean = [Rights.MODERATOR, Rights.ADMIN].includes(
+      currentUser.rights
+    );
+
+    if (!isModerator && (!slang.user || slang.user.id !== currentUser.id))
       throw new HttpException('Доступ запрещён', HttpStatus.FORBIDDEN);
 
     await this.slangsRepository.remove(slang);
