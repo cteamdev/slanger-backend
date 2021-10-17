@@ -165,9 +165,13 @@ export class SlangsService {
     );
     if (!slang) throw new HttpException('Не найдено', HttpStatus.NOT_FOUND);
 
-    if (!slang.user || slang.user.id !== currentUser.id)
+    const isModerator: boolean = [Rights.MODERATOR, Rights.ADMIN].includes(
+      currentUser.rights
+    );
+
+    if (!isModerator && (!slang.user || slang.user.id !== currentUser.id))
       throw new HttpException('Доступ запрещён', HttpStatus.FORBIDDEN);
-    if (slang.status !== SlangStatus.MODERATING)
+    if (!isModerator && slang.status !== SlangStatus.MODERATING)
       throw new HttpException(
         'Редактировать можно только слэнги на модерации',
         HttpStatus.BAD_REQUEST
