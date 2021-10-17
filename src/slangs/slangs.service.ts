@@ -108,8 +108,14 @@ export class SlangsService {
         HttpStatus.BAD_REQUEST
       );
 
+    const user: User | undefined =
+      body.fromEdition &&
+      [Rights.MODERATOR, Rights.ADMIN].includes(currentUser.rights)
+        ? undefined
+        : currentUser;
+
     const slang: Slang = await this.slangsRepository.save(
-      new Slang({ ...body, user: currentUser })
+      new Slang({ ...body, user })
     );
     await this.meiliIndex.addDocuments([slang.toMeiliEntity()]);
 

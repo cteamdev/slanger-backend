@@ -48,10 +48,12 @@ export class Slang {
     return {
       ...this,
       userId: this.user?.id,
-      user: {
-        id: this.user?.id,
-        vk: this.user?.vk
-      }
+      user: this.user
+        ? {
+            id: this.user.id,
+            vk: this.user.vk
+          }
+        : undefined
     };
   }
 }
