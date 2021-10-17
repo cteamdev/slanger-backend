@@ -119,34 +119,36 @@ export class SlangsService {
     );
     await this.meiliIndex.addDocuments([slang.toMeiliEntity()]);
 
-    if (
-      !currentUser.dayLimitDate ||
-      currentUser.dayLimitDate.toDateString() !== new Date().toDateString()
-    ) {
-      currentUser.dayLimitDate = new Date();
-      currentUser.dayLimitCount = 1;
-    } else currentUser.dayLimitCount++;
+    if (user) {
+      if (
+        !currentUser.dayLimitDate ||
+        currentUser.dayLimitDate.toDateString() !== new Date().toDateString()
+      ) {
+        currentUser.dayLimitDate = new Date();
+        currentUser.dayLimitCount = 1;
+      } else currentUser.dayLimitCount++;
 
-    await this.usersRepository.save(currentUser);
+      await this.usersRepository.save(currentUser);
 
-    const format: string = formatRelative(slang.date, new Date(), {
-      locale: ru
-    });
-    const link: string =
-      this.helpersService.getConfig('APP_URL') + '#slang?id=' + slang.id;
-    this.helpersService.sendAdminMessage(stripIndents`
-      📩 Новый слэнг на модерации
-
-      🔢 ID: ${slang.id}
-      🧐 Автор: @id${currentUser.id}
-      ⏰ Дата: ${format} по МСК
-
-      📌 Слово: ${slang.word}
-      🎬 Тип: ${slang.type}
-      📖 Краткое описание: ${slang.description}
-
-      📎 Ссылка на модерацию: ${link}
-    `);
+      const format: string = formatRelative(slang.date, new Date(), {
+        locale: ru
+      });
+      const link: string =
+        this.helpersService.getConfig('APP_URL') + '#slang?id=' + slang.id;
+      this.helpersService.sendAdminMessage(stripIndents`
+        📩 Новый слэнг на модерации
+  
+        🔢 ID: ${slang.id}
+        🧐 Автор: @id${currentUser.id}
+        ⏰ Дата: ${format} по МСК
+  
+        📌 Слово: ${slang.word}
+        🎬 Тип: ${slang.type}
+        📖 Краткое описание: ${slang.description}
+  
+        📎 Ссылка на модерацию: ${link}
+      `);
+    }
 
     return slang;
   }
