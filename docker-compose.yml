@@ -38,6 +38,8 @@ services:
     image: nginx:latest
     ports:
       - 80:80
+    depends_on:
+      - slanger-backend
     volumes:
       - $PWD/nginx:/etc/nginx
 
