@@ -7,7 +7,7 @@ services:
     env_file:
       - .env
     volumes:
-      - postgres:/var/lib/postgresql
+      - $PWD/data/postgres:/var/lib/postgresql
 
   redis:
     image: redis:latest
@@ -15,14 +15,14 @@ services:
     env_file:
       - .env
     volumes:
-      - redis:/data
+      - $PWD/data/redis:/data
 
   meilisearch:
     image: getmeili/meilisearch:latest
     env_file:
       - .env
     volumes:
-      - meilisearch:/data.ms
+      - $PWD/data/meilisearch:/data.ms
 
   slanger-backend:
     build: ./
