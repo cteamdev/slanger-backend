@@ -13,7 +13,7 @@ export class Bookmark {
   @ManyToOne(() => User, (user) => user.bookmarks)
   user: User;
 
-  @ManyToOne(() => Slang)
+  @ManyToOne(() => Slang, { onDelete: 'CASCADE' })
   @ApiProperty()
   slang: Slang;
 
