@@ -57,7 +57,7 @@ export class User {
   bookmarks: Bookmark[];
 
   @JoinColumn()
-  @OneToOne(() => Settings)
+  @OneToOne(() => Settings, (settings) => settings.user)
   @Expose({ groups: [Groups.CURRENT_USER] })
   @ApiPropertyOptional()
   settings: Settings;
