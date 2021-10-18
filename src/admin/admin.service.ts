@@ -113,7 +113,7 @@ export class AdminService {
     const user: User | undefined = await this.usersRepository.findOne({ id });
     if (!user) throw new HttpException('Не найдено', HttpStatus.NOT_FOUND);
 
-    if (user.rights >= Rights.ADMIN)
+    if (user.rights === Rights.ADMIN)
       throw new HttpException(
         'Невозможно поменять права администратору',
         HttpStatus.FORBIDDEN
