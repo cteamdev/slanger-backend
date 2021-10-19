@@ -16,6 +16,7 @@ import { HelpersService } from '@/common/helpers/helpers.service';
 import { Rights } from '@/common/types/rights.types';
 import { User } from '@/users/entities/user.entity';
 import { Slang } from '@/slangs/entities/slang.entity';
+import { AdminService } from '@/admin/admin.service';
 import { SlangStatus } from '@/slangs/types/slang-status.types';
 
 @Injectable()
@@ -23,9 +24,8 @@ export class UtilsService {
   constructor(
     private readonly configService: ConfigService,
     private readonly helpersService: HelpersService,
-    @InjectRepository(User) private readonly usersRepository: Repository<User>,
-    @InjectRepository(Slang)
-    private readonly slangsRepository: Repository<Slang>
+    private readonly adminService: AdminService,
+    @InjectRepository(User) private readonly usersRepository: Repository<User>
   ) {
     this.helpersService.groupVK.updates.on(
       'message_event',
@@ -70,20 +70,17 @@ export class UtilsService {
     const { slangId, action } = eventPayload;
     if (!slangId || !action) return sendSnackbar('Не найдено');
 
-    const slang: Slang | undefined = await this.slangsRepository.findOne({
-      id: slangId
+    const slang: Slang | undefined = await this.adminService.setSlangStatus({
+      id: slangId,
+      status: action
     });
     if (!slang) return sendSnackbar('Не найдено');
-
-    slang.status = action;
-    await this.slangsRepository.save(slang);
 
     const statuses = {
       [SlangStatus.MODERATING]: 'на модерации',
       [SlangStatus.DECLINED]: 'отклонён модерацией',
       [SlangStatus.PUBLIC]: 'опубликован'
     };
-
     const format: string = formatRelative(slang.date, new Date(), {
       locale: ru
     });
