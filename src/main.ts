@@ -1,9 +1,3 @@
-import fastify, {
-  FastifyInstance,
-  FastifyReply,
-  FastifyRequest,
-  HookHandlerDoneFunction
-} from 'fastify';
 import { NestFactory } from '@nestjs/core';
 import { ConsoleLogger, Logger } from '@nestjs/common';
 import {
@@ -17,6 +11,17 @@ import {
   FastifySwaggerCustomOptions
 } from '@nestjs/swagger';
 import { ConfigService } from '@nestjs/config';
+
+import fastify, {
+  FastifyInstance,
+  FastifyReply,
+  FastifyRequest,
+  HookHandlerDoneFunction
+} from 'fastify';
+import {
+  initializeTransactionalContext,
+  patchTypeORMRepositoryWithBaseRepository
+} from 'typeorm-transactional-cls-hooked';
 
 import { AppModule } from '@/app.module';
 
@@ -57,6 +62,10 @@ async function bootstrap() {
       }
     );
   }
+
+  // Инициализация typeorm-transactional-cls-hooked
+  initializeTransactionalContext();
+  patchTypeORMRepositoryWithBaseRepository();
 
   const app: NestFastifyApplication =
     await NestFactory.create<NestFastifyApplication>(

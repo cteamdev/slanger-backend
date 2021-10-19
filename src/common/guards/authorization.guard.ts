@@ -12,6 +12,7 @@ import {
 import { Reflector } from '@nestjs/core';
 import { InjectRepository } from '@nestjs/typeorm';
 import { ConfigService } from '@nestjs/config';
+import { Transactional } from 'typeorm-transactional-cls-hooked';
 import { Repository } from 'typeorm';
 import { parse, stringify } from 'querystring';
 import { Cache } from 'cache-manager';
@@ -31,6 +32,7 @@ export class AuthorizationGuard implements CanActivate {
     private readonly settingsRepository: Repository<Settings>
   ) {}
 
+  @Transactional()
   async canActivate(context: ExecutionContext): Promise<boolean> {
     if (this.reflector.get<boolean>('excludeGuards', context.getHandler()))
       return true;

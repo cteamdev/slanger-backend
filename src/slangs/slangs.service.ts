@@ -2,6 +2,7 @@ import { HttpException, HttpStatus, Injectable, Logger } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { InjectMeiliSearch } from 'nestjs-meilisearch';
 import { MeiliSearch, Index, SearchResponse } from 'meilisearch';
+import { Transactional } from 'typeorm-transactional-cls-hooked';
 import { Repository } from 'typeorm';
 import { stripIndents } from 'common-tags';
 import { formatRelative } from 'date-fns';
@@ -94,6 +95,7 @@ export class SlangsService {
     return slang;
   }
 
+  @Transactional()
   async create(currentUser: User, body: CreateSlangDto): Promise<Slang> {
     const dayLimit: number = 10;
 
@@ -153,6 +155,7 @@ export class SlangsService {
     return slang;
   }
 
+  @Transactional()
   async edit(
     currentUser: User,
     body: EditSlangDto
@@ -187,6 +190,7 @@ export class SlangsService {
     return slang;
   }
 
+  @Transactional()
   async delete(
     currentUser: User,
     { id }: DeleteSlangDto

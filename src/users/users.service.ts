@@ -6,6 +6,7 @@ import {
   Injectable
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
+import { Transactional } from 'typeorm-transactional-cls-hooked';
 import { Repository } from 'typeorm';
 import { Cache } from 'cache-manager';
 import { UsersGetResponse } from 'vk-io/lib/api/schemas/responses';
@@ -36,6 +37,7 @@ export class UsersService {
     return user;
   }
 
+  @Transactional()
   async setSettings(
     currentUser: User,
     body: SetSettingsDto

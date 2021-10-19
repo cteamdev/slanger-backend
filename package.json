@@ -42,6 +42,7 @@
     "rimraf": "^3.0.2",
     "rxjs": "^7.2.0",
     "typeorm": "^0.2.37",
+    "typeorm-transactional-cls-hooked": "^0.1.21",
     "vk-io": "^4.4.0"
   },
   "devDependencies": {

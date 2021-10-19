@@ -1,5 +1,6 @@
 import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
+import { Transactional } from 'typeorm-transactional-cls-hooked';
 import { Repository } from 'typeorm';
 
 import { HelpersService } from '@/common/helpers/helpers.service';
@@ -35,6 +36,7 @@ export class BookmarksService {
     );
   }
 
+  @Transactional()
   async create(
     currentUser: User,
     { slangId }: CreateBookmarkDto
@@ -67,6 +69,7 @@ export class BookmarksService {
     return bookmark;
   }
 
+  @Transactional()
   async remove(
     currentUser: User,
     { id }: RemoveBookmarkDto

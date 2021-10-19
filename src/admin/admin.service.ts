@@ -1,5 +1,6 @@
 import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
+import { Transactional } from 'typeorm-transactional-cls-hooked';
 import { InjectMeiliSearch } from 'nestjs-meilisearch';
 import { MeiliSearch, Index, SearchResponse } from 'meilisearch';
 import { Repository } from 'typeorm';
@@ -44,6 +45,7 @@ export class AdminService {
     });
   }
 
+  @Transactional()
   async setSlangStatus({
     id,
     status
@@ -106,6 +108,7 @@ export class AdminService {
     return slang;
   }
 
+  @Transactional()
   async setUserRights({
     id,
     rights
