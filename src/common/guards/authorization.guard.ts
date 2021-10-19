@@ -10,10 +10,8 @@ import {
   HttpStatus
 } from '@nestjs/common';
 import { Reflector } from '@nestjs/core';
-import { InjectRepository } from '@nestjs/typeorm';
 import { ConfigService } from '@nestjs/config';
-import { Transactional } from 'typeorm-transactional-cls-hooked';
-import { Repository } from 'typeorm';
+import { EntityManager } from 'typeorm';
 import { parse, stringify } from 'querystring';
 import { Cache } from 'cache-manager';
 
@@ -24,15 +22,12 @@ import { Settings } from '@/users/entities/settings.entity';
 @Injectable()
 export class AuthorizationGuard implements CanActivate {
   constructor(
+    private readonly manager: EntityManager,
     private readonly reflector: Reflector,
-    @Inject(CACHE_MANAGER) private readonly cacheManager: Cache,
     private readonly configService: ConfigService,
-    @InjectRepository(User) private readonly usersRepository: Repository<User>,
-    @InjectRepository(Settings)
-    private readonly settingsRepository: Repository<Settings>
+    @Inject(CACHE_MANAGER) private readonly cacheManager: Cache
   ) {}
 
-  @Transactional()
   async canActivate(context: ExecutionContext): Promise<boolean> {
     if (this.reflector.get<boolean>('excludeGuards', context.getHandler()))
       return true;
@@ -87,22 +82,29 @@ export class AuthorizationGuard implements CanActivate {
     request: Request,
     data: Record<string, unknown>
   ): Promise<boolean> {
-    const id: number = Number.parseInt(data.vk_user_id as string);
+    return this.manager.transaction(
+      async (transactionManager: EntityManager) => {
+        await transactionManager.query('LOCK TABLE "user"');
 
-    let user: User | undefined = await this.usersRepository.findOne({ id });
-    if (!user) {
-      const settings: Settings = new Settings();
-      await this.settingsRepository.save(settings);
+        const id: number = Number.parseInt(data.vk_user_id as string);
 
-      user = new User({ id, settings });
-      if (data.vk_ref) user.ref = data.vk_ref as string;
+        let user: User | undefined = await transactionManager.findOne(User, {
+          id
+        });
+        if (!user) {
+          const settings: Settings = new Settings();
 
-      await this.usersRepository.save(user);
-    }
+          user = new User({ id, settings });
+          if (data.vk_ref) user.ref = data.vk_ref as string;
 
-    request.currentUserId = id;
-    request.currentUser = user;
+          await transactionManager.save(user);
+        }
 
-    return true;
+        request.currentUserId = id;
+        request.currentUser = user;
+
+        return true;
+      }
+    );
   }
 }

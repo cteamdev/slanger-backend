@@ -2,8 +2,7 @@ import { HttpException, HttpStatus, Injectable, Logger } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { InjectMeiliSearch } from 'nestjs-meilisearch';
 import { MeiliSearch, Index, SearchResponse } from 'meilisearch';
-import { Transactional } from 'typeorm-transactional-cls-hooked';
-import { Repository } from 'typeorm';
+import { EntityManager, Repository } from 'typeorm';
 import {
   ButtonColor,
   DocumentAttachment,
@@ -33,6 +32,7 @@ export class SlangsService {
     this.meiliSearch.index<SlangMeili>('slangs');
 
   constructor(
+    private readonly manager: EntityManager,
     private readonly helpersService: HelpersService,
     @InjectMeiliSearch() private readonly meiliSearch: MeiliSearch,
     @InjectRepository(User)
@@ -101,83 +101,94 @@ export class SlangsService {
     return slang;
   }
 
-  @Transactional()
   async create(currentUser: User, body: CreateSlangDto): Promise<Slang> {
-    const dayLimit: number = 10;
+    return this.manager.transaction(
+      async (transactionManager: EntityManager) => {
+        transactionManager
+          .getRepository(User)
+          .createQueryBuilder()
+          .setLock('pessimistic_read')
+          .execute();
 
-    if (
-      currentUser.rights === Rights.USER &&
-      currentUser.dayLimitDate &&
-      currentUser.dayLimitDate.toDateString() === new Date().toDateString() &&
-      currentUser.dayLimitCount >= dayLimit
-    )
-      throw new HttpException(
-        'Дневной лимит (10 слов) истёк, возвращайтесь завтра',
-        HttpStatus.BAD_REQUEST
-      );
-
-    const user: User | undefined =
-      body.fromEdition &&
-      [Rights.MODERATOR, Rights.ADMIN].includes(currentUser.rights)
-        ? undefined
-        : currentUser;
-
-    const slang: Slang = await this.slangsRepository.save(
-      new Slang({ ...body, user })
-    );
-    await this.meiliIndex.addDocuments([slang.toMeiliEntity()]);
-
-    if (user) {
-      if (
-        !currentUser.dayLimitDate ||
-        currentUser.dayLimitDate.toDateString() !== new Date().toDateString()
-      ) {
-        currentUser.dayLimitDate = new Date();
-        currentUser.dayLimitCount = 1;
-      } else currentUser.dayLimitCount++;
-
-      await this.usersRepository.save(currentUser);
-
-      setImmediate(async () => {
-        const format: string = formatRelative(slang.date, new Date(), {
-          locale: ru
-        });
-        const link: string =
-          this.helpersService.getConfig('APP_URL') + '#slang?id=' + slang.id;
-
-        const upload: DocumentAttachment | undefined =
-          await this.helpersService.uploadCover(slang.cover);
-
-        const { conversation_message_id } =
-          await this.helpersService.sendAdminMessage(
-            stripIndents`
-              📩 Новый слэнг на модерации
-        
-              🔢 ID: ${slang.id}
-              🧐 Автор: @id${currentUser.id}
-              ⏰ Дата: ${format} по МСК
-        
-              📌 Слово: ${slang.word}
-              🎬 Тип: ${slang.type}
-              📖 Краткое описание: ${slang.description}
-        
-              📎 Ссылка на модерацию: ${link}
-            `,
-            {
-              attachment: upload?.toString(),
-              keyboard: this.getKeyboard(slang.id)
-            }
+        const dayLimit: number = 10;
+        if (
+          currentUser.rights === Rights.USER &&
+          currentUser.dayLimitDate &&
+          currentUser.dayLimitDate.toDateString() ===
+            new Date().toDateString() &&
+          currentUser.dayLimitCount >= dayLimit
+        )
+          throw new HttpException(
+            'Дневной лимит (10 слов) истёк, возвращайтесь завтра',
+            HttpStatus.BAD_REQUEST
           );
 
-        slang.conversationMessageId = conversation_message_id;
-        await this.slangsRepository.save(slang);
-      });
-    }
+        const user: User | undefined =
+          body.fromEdition &&
+          [Rights.MODERATOR, Rights.ADMIN].includes(currentUser.rights)
+            ? undefined
+            : currentUser;
 
-    return slang;
+        const slang: Slang = await transactionManager.save(
+          new Slang({ ...body, user })
+        );
+        await this.meiliIndex.addDocuments([slang.toMeiliEntity()]);
+
+        if (user) {
+          if (
+            !currentUser.dayLimitDate ||
+            currentUser.dayLimitDate.toDateString() !==
+              new Date().toDateString()
+          ) {
+            currentUser.dayLimitDate = new Date();
+            currentUser.dayLimitCount = 1;
+          } else currentUser.dayLimitCount++;
+
+          await transactionManager.save(currentUser);
+
+          setImmediate(async () => {
+            const format: string = formatRelative(slang.date, new Date(), {
+              locale: ru
+            });
+            const link: string =
+              this.helpersService.getConfig('APP_URL') +
+              '#slang?id=' +
+              slang.id;
+
+            const upload: DocumentAttachment | undefined =
+              await this.helpersService.uploadCover(slang.cover);
+
+            const { conversation_message_id } =
+              await this.helpersService.sendAdminMessage(
+                stripIndents`
+                📩 Новый слэнг на модерации
+          
+                🔢 ID: ${slang.id}
+                🧐 Автор: @id${currentUser.id}
+                ⏰ Дата: ${format} по МСК
+          
+                📌 Слово: ${slang.word}
+                🎬 Тип: ${slang.type}
+                📖 Краткое описание: ${slang.description}
+          
+                📎 Ссылка на модерацию: ${link}
+              `,
+                {
+                  attachment: upload?.toString(),
+                  keyboard: this.getKeyboard(slang.id)
+                }
+              );
+
+            slang.conversationMessageId = conversation_message_id;
+            await this.slangsRepository.save(slang);
+          });
+        }
+
+        return slang;
+      }
+    );
   }
 
-  @Transactional()
   async edit(
     currentUser: User,
     body: EditSlangDto
@@ -246,7 +257,6 @@ export class SlangsService {
     return slang;
   }
 
-  @Transactional()
   async delete(
     currentUser: User,
     { id }: DeleteSlangDto

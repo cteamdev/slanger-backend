@@ -18,10 +18,6 @@ import fastify, {
   FastifyRequest,
   HookHandlerDoneFunction
 } from 'fastify';
-import {
-  initializeTransactionalContext,
-  patchTypeORMRepositoryWithBaseRepository
-} from 'typeorm-transactional-cls-hooked';
 
 import { AppModule } from '@/app.module';
 
@@ -62,10 +58,6 @@ async function bootstrap() {
       }
     );
   }
-
-  // Инициализация typeorm-transactional-cls-hooked
-  initializeTransactionalContext();
-  patchTypeORMRepositoryWithBaseRepository();
 
   const app: NestFastifyApplication =
     await NestFactory.create<NestFastifyApplication>(

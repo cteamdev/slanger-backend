@@ -18,7 +18,7 @@ import { Settings } from './settings.entity';
 
 @Entity()
 export class User {
-  @PrimaryColumn()
+  @PrimaryColumn({ unique: true })
   @ApiProperty()
   id: number;
 
@@ -57,7 +57,9 @@ export class User {
   bookmarks: Bookmark[];
 
   @JoinColumn()
-  @OneToOne(() => Settings, (settings) => settings.user)
+  @OneToOne(() => Settings, (settings) => settings.user, {
+    cascade: ['insert']
+  })
   @Expose({ groups: [Groups.CURRENT_USER] })
   @ApiPropertyOptional()
   settings: Settings;
