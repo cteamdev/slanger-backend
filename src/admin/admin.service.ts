@@ -129,7 +129,7 @@ export class AdminService {
     this.usersService.sendNotification({
       user,
       message: `😉 Вам выданы новые права, теперь вы ${ru[user.rights]}`,
-      hash: 'user?id=' + user.id
+      hash: 'profile?id=' + user.id
     });
 
     return user;
