@@ -104,11 +104,11 @@ export class SlangsService {
   async create(currentUser: User, body: CreateSlangDto): Promise<Slang> {
     return this.manager.transaction(
       async (transactionManager: EntityManager) => {
-        transactionManager
-          .getRepository(User)
-          .createQueryBuilder()
-          .setLock('pessimistic_read')
-          .execute();
+        currentUser = (await transactionManager.findOne(
+          User,
+          { id: currentUser.id },
+          { lock: { mode: 'pessimistic_write' } }
+        )) as User;
 
         const dayLimit: number = 10;
         if (
