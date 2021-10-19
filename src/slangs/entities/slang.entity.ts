@@ -1,5 +1,6 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import { Entity, Column, PrimaryGeneratedColumn, ManyToOne } from 'typeorm';
+import { Exclude } from 'class-transformer';
 
 import { User } from '@/users/entities/user.entity';
 import { SlangStatus } from '../types/slang-status.types';
@@ -31,6 +32,10 @@ export class Slang {
   @Column()
   @ApiProperty()
   description: string;
+
+  @Column({ nullable: true })
+  @Exclude()
+  conversationMessageId?: number;
 
   @Column()
   @ApiProperty({ enum: SlangStatus })

@@ -23,6 +23,7 @@ import { Settings } from '@/users/entities/settings.entity';
 import { SlangsModule } from '@/slangs/slangs.module';
 import { BookmarksModule } from '@/bookmarks/bookmarks.module';
 import { AdminModule } from '@/admin/admin.module';
+import { UtilsModule } from '@/utils/utils.module';
 
 @Module({
   imports: [
@@ -70,7 +71,8 @@ import { AdminModule } from '@/admin/admin.module';
     UsersModule,
     SlangsModule,
     BookmarksModule,
-    AdminModule
+    AdminModule,
+    UtilsModule
   ],
   providers: [
     AppService,

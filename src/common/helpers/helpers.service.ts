@@ -1,7 +1,12 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
-import { VK } from 'vk-io';
-import { NotificationsSendMessageResponse } from 'vk-io/lib/api/schemas/responses';
+import { DocumentAttachment, VK } from 'vk-io';
+import { MessagesSendUserIdsResponseItem } from 'vk-io/lib/api/schemas/objects';
+import { MessagesSendParams } from 'vk-io/lib/api/schemas/params';
+import {
+  MessagesSendUserIdsResponse,
+  NotificationsSendMessageResponse
+} from 'vk-io/lib/api/schemas/responses';
 
 @Injectable()
 export class HelpersService {
@@ -66,16 +71,58 @@ export class HelpersService {
     return rules[rule];
   }
 
-  async sendMessage(peerId: number, message: string): Promise<number> {
-    return this.groupVK.api.messages.send({
-      peer_id: peerId,
-      random_id: 0,
-      message
+  async sendMessage(
+    peerId: number,
+    message: string,
+    other: MessagesSendParams = {}
+  ): Promise<MessagesSendUserIdsResponseItem> {
+    // В vk-io неверные типы
+    return (
+      this.groupVK.api.messages.send({
+        peer_ids: [peerId],
+        random_id: 0,
+        message,
+        ...other
+      }) as unknown as Promise<MessagesSendUserIdsResponse>
+    ).then((data: MessagesSendUserIdsResponse) => data[0]);
+  }
+
+  async sendAdminMessage(
+    message: string,
+    other: MessagesSendParams = {}
+  ): Promise<MessagesSendUserIdsResponseItem> {
+    return this.sendMessage(
+      +this.configService.get('ADMIN_PEER_ID'),
+      message,
+      other
+    );
+  }
+
+  async editAdminMessage(
+    conversation_message_id: number,
+    message: string,
+    other: MessagesSendParams = {}
+  ): Promise<number> {
+    return this.groupVK.api.messages.edit({
+      peer_id: +this.configService.get('ADMIN_PEER_ID'),
+      conversation_message_id,
+      message,
+      ...other
     });
   }
 
-  async sendAdminMessage(message: string): Promise<number> {
-    return this.sendMessage(+this.configService.get('ADMIN_PEER_ID'), message);
+  async uploadCover(
+    cover: string | undefined
+  ): Promise<DocumentAttachment | undefined> {
+    if (!cover) return;
+    if (!cover.startsWith('https://') && !cover.startsWith('http://')) return;
+
+    return this.groupVK.upload.messageDocument({
+      peer_id: +this.configService.get('ADMIN_PEER_ID'),
+      source: {
+        value: cover
+      }
+    });
   }
 
   async sendNotification(
