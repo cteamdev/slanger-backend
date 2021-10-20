@@ -1,14 +1,42 @@
-import { TransformZalgo } from '@/common/decorators/transform-zalgo.decorator';
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import {
+  ArrayMaxSize,
+  ArrayMinSize,
   IsBoolean,
   IsEnum,
   IsOptional,
+  isString,
   IsString,
-  Length
+  Length,
+  Validate,
+  ValidatorConstraint,
+  ValidatorConstraintInterface
 } from 'class-validator';
 
+import { TransformZalgo } from '@/common/decorators/transform-zalgo.decorator';
 import { SlangType } from '../types/slang-type.types';
+import { SlangTheme } from '../types/slang-theme.types';
+
+@ValidatorConstraint()
+class IsUniqueThemeArray implements ValidatorConstraintInterface {
+  public validate(data: unknown): boolean {
+    const found: string[] = [];
+
+    return (
+      Array.isArray(data) &&
+      data.every((value: unknown) => {
+        if (
+          isString(value) &&
+          Object.values(SlangTheme).some((theme: string) => value === theme) &&
+          !found.some((theme: string) => value === theme)
+        ) {
+          found.push(value);
+          return true;
+        } else return false;
+      })
+    );
+  }
+}
 
 export class CreateSlangDto {
   @IsEnum(SlangType)
@@ -16,6 +44,18 @@ export class CreateSlangDto {
     enum: SlangType
   })
   type: SlangType;
+
+  @Validate(IsUniqueThemeArray, {
+    message:
+      'themes.0.each property of themes should be a member of SlangTheme and unique'
+  })
+  @ArrayMinSize(0)
+  @ArrayMaxSize(Object.keys(SlangTheme).length)
+  @ApiProperty({
+    enum: SlangTheme,
+    isArray: true
+  })
+  themes: SlangTheme[];
 
   @IsString()
   @IsOptional()
