@@ -35,7 +35,7 @@ export class Slang {
   description: string;
 
   @Column({ type: 'text', enum: SlangTheme, array: true, default: [] })
-  @ApiProperty({ enum: [SlangTheme] })
+  @ApiProperty({ enum: SlangTheme, isArray: true })
   themes: SlangTheme[] = [];
 
   @Column()
