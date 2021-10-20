@@ -1,23 +1,14 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { ConfigService } from '@nestjs/config';
-import {
-  ButtonColor,
-  DocumentAttachment,
-  Keyboard,
-  MessageEventContext
-} from 'vk-io';
+import { MessageEventContext } from 'vk-io';
 import { Repository } from 'typeorm';
-import { stripIndents } from 'common-tags';
-import { ru } from 'date-fns/locale';
-import { formatRelative } from 'date-fns';
 
-import { HelpersService } from '@/common/helpers/helpers.service';
+import { AdminMessage, HelpersService } from '@/common/helpers/helpers.service';
 import { Rights } from '@/common/types/rights.types';
 import { User } from '@/users/entities/user.entity';
 import { Slang } from '@/slangs/entities/slang.entity';
 import { AdminService } from '@/admin/admin.service';
-import { SlangStatus } from '@/slangs/types/slang-status.types';
 
 @Injectable()
 export class UtilsService {
@@ -76,51 +67,13 @@ export class UtilsService {
     });
     if (!slang) return sendSnackbar('Не найдено');
 
-    const statuses = {
-      [SlangStatus.MODERATING]: 'на модерации',
-      [SlangStatus.DECLINED]: 'отклонён модерацией',
-      [SlangStatus.PUBLIC]: 'опубликован'
-    };
-    const format: string = formatRelative(slang.date, new Date(), {
-      locale: ru
-    });
-    const link: string =
-      this.helpersService.getConfig('APP_URL') + '#slang?id=' + slang.id;
-
-    const upload: DocumentAttachment | undefined =
-      await this.helpersService.uploadCover(slang.cover);
+    const { text, params }: AdminMessage =
+      await this.helpersService.getAdminMessage(slang);
 
     await this.helpersService.editAdminMessage(
       conversationMessageId,
-      stripIndents`
-        📩 Слэнг прошёл модерацию
-        🤨 Статус: ${statuses[slang.status]}
-
-        🔢 ID: ${slang.id}
-        🧐 Автор: @id${userId}
-        ⏰ Дата: ${format} по МСК
-
-        📌 Слово: ${slang.word}
-        🎬 Тип: ${slang.type}
-        📖 Краткое описание: ${slang.description}
-
-        📎 Ссылка на модерацию: ${link}
-      `,
-      {
-        attachment: upload?.toString(),
-        keyboard: Keyboard.builder()
-          .inline()
-          .callbackButton({
-            label: 'Отклонить',
-            color: ButtonColor.NEGATIVE,
-            payload: { action: 'declined', slangId }
-          })
-          .callbackButton({
-            label: 'Одобрить',
-            color: ButtonColor.POSITIVE,
-            payload: { action: 'public', slangId }
-          })
-      }
+      text,
+      params
     );
 
     return sendSnackbar('Успех');

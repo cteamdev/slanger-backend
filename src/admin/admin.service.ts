@@ -4,7 +4,7 @@ import { InjectMeiliSearch } from 'nestjs-meilisearch';
 import { MeiliSearch, Index, SearchResponse } from 'meilisearch';
 import { Repository } from 'typeorm';
 
-import { HelpersService } from '@/common/helpers/helpers.service';
+import { AdminMessage, HelpersService } from '@/common/helpers/helpers.service';
 import { Rights } from '@/common/types/rights.types';
 import { UsersService } from '@/users/users.service';
 import { User } from '@/users/entities/user.entity';
@@ -76,7 +76,7 @@ export class AdminService {
         await this.usersRepository.save(slang.user);
       }
 
-      const ru = {
+      const statuses = {
         [SlangStatus.MODERATING]: 'на модерации',
         [SlangStatus.DECLINED]: 'отклонён модерацией',
         [SlangStatus.PUBLIC]:
@@ -98,9 +98,20 @@ export class AdminService {
 
       this.usersService.sendNotification({
         user: slang.user,
-        message: `🧐 Новый статус слэнга: ${ru[status]}`,
+        message: `🧐 Новый статус слэнга: ${statuses[status]}`,
         hash: 'slang?id=' + slang.id
       });
+
+      if (slang.conversationMessageId) {
+        const { text, params }: AdminMessage =
+          await this.helpersService.getAdminMessage(slang);
+
+        await this.helpersService.editAdminMessage(
+          slang.conversationMessageId,
+          text,
+          params
+        );
+      }
     }
 
     return slang;

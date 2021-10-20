@@ -1,12 +1,23 @@
+import { Slang } from '@/slangs/entities/slang.entity';
+import { SlangStatus } from '@/slangs/types/slang-status.types';
+import { SlangType } from '@/slangs/types/slang-type.types';
 import { Injectable, Logger } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
-import { DocumentAttachment, VK } from 'vk-io';
+import { stripIndents } from 'common-tags';
+import { formatRelative } from 'date-fns';
+import { ru } from 'date-fns/locale';
+import { ButtonColor, DocumentAttachment, Keyboard, VK } from 'vk-io';
 import { MessagesSendUserIdsResponseItem } from 'vk-io/lib/api/schemas/objects';
 import { MessagesSendParams } from 'vk-io/lib/api/schemas/params';
 import {
   MessagesSendUserIdsResponse,
   NotificationsSendMessageResponse
 } from 'vk-io/lib/api/schemas/responses';
+
+export type AdminMessage = {
+  text: string;
+  params: Partial<MessagesSendParams>;
+};
 
 @Injectable()
 export class HelpersService {
@@ -69,6 +80,81 @@ export class HelpersService {
     };
 
     return rules[rule];
+  }
+
+  async getAdminMessage(
+    slang: Slang,
+    edit: boolean = false
+  ): Promise<AdminMessage> {
+    const format: string = formatRelative(slang.date, new Date(), {
+      locale: ru
+    });
+    const link: string = this.getConfig('APP_URL') + '#slang?id=' + slang.id;
+
+    const points = {
+      [SlangType.WORD]: 8,
+      [SlangType.COLLOCATION]: 10,
+      [SlangType.PROVERB]: 12,
+      [SlangType.PHRASEOLOGICAL_UNIT]: 12
+    };
+    const statuses = {
+      [SlangStatus.MODERATING]: 'на модерации',
+      [SlangStatus.DECLINED]: 'отклонён модерацией',
+      [SlangStatus.PUBLIC]:
+        'опубликован, вам ' +
+        this.pluralize(points[slang.type], [
+          'начислен',
+          'начислено',
+          'начислено'
+        ]) +
+        ' ' +
+        points[slang.type] +
+        ' ' +
+        this.pluralize(points[slang.type], ['балл', 'балла', 'баллов'])
+    };
+
+    const upload: DocumentAttachment | undefined = await this.uploadCover(
+      slang.cover
+    );
+
+    return {
+      text: stripIndents`
+        ${
+          slang.status === SlangStatus.MODERATING
+            ? `📩 Новый слэнг на модерации ${edit ? '(ред.)' : ''}`
+            : `
+                📩 Слэнг прошёл модерацию ${edit ? '(ред.)' : ''}
+                🤨 Статус: ${statuses[slang.status]}
+              `
+        }
+
+        🔢 ID: ${slang.id}
+        🧐 Автор: @id${slang.user?.id}
+        ⏰ Дата: ${format} по МСК
+
+        📌 Слово: ${slang.word}
+        🎬 Тип: ${slang.type}
+        😇 Темы: ${slang.themes.join(', ')}
+        📖 Краткое описание: ${slang.description}
+
+        📎 Ссылка на модерацию: ${link}
+      `,
+      params: {
+        attachment: upload?.toString(),
+        keyboard: Keyboard.builder()
+          .inline()
+          .callbackButton({
+            label: 'Отклонить',
+            color: ButtonColor.NEGATIVE,
+            payload: { action: 'declined', slangId: slang.id }
+          })
+          .callbackButton({
+            label: 'Одобрить',
+            color: ButtonColor.POSITIVE,
+            payload: { action: 'public', slangId: slang.id }
+          })
+      }
+    };
   }
 
   async sendMessage(

@@ -3,17 +3,8 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { InjectMeiliSearch } from 'nestjs-meilisearch';
 import { MeiliSearch, Index, SearchResponse } from 'meilisearch';
 import { EntityManager, Repository } from 'typeorm';
-import {
-  ButtonColor,
-  DocumentAttachment,
-  Keyboard,
-  KeyboardBuilder
-} from 'vk-io';
-import { stripIndents } from 'common-tags';
-import { formatRelative } from 'date-fns';
-import { ru } from 'date-fns/locale';
 
-import { HelpersService } from '@/common/helpers/helpers.service';
+import { AdminMessage, HelpersService } from '@/common/helpers/helpers.service';
 import { Rights } from '@/common/types/rights.types';
 import { User } from '@/users/entities/user.entity';
 import { Slang } from './entities/slang.entity';
@@ -147,37 +138,11 @@ export class SlangsService {
           await transactionManager.save(currentUser);
 
           setImmediate(async () => {
-            const format: string = formatRelative(slang.date, new Date(), {
-              locale: ru
-            });
-            const link: string =
-              this.helpersService.getConfig('APP_URL') +
-              '#slang?id=' +
-              slang.id;
-
-            const upload: DocumentAttachment | undefined =
-              await this.helpersService.uploadCover(slang.cover);
+            const { text, params }: AdminMessage =
+              await this.helpersService.getAdminMessage(slang);
 
             const { conversation_message_id } =
-              await this.helpersService.sendAdminMessage(
-                stripIndents`
-                📩 Новый слэнг на модерации
-          
-                🔢 ID: ${slang.id}
-                🧐 Автор: @id${currentUser.id}
-                ⏰ Дата: ${format} по МСК
-          
-                📌 Слово: ${slang.word}
-                🎬 Тип: ${slang.type}
-                📖 Краткое описание: ${slang.description}
-          
-                📎 Ссылка на модерацию: ${link}
-              `,
-                {
-                  attachment: upload?.toString(),
-                  keyboard: this.getKeyboard(slang.id)
-                }
-              );
+              await this.helpersService.sendAdminMessage(text, params);
 
             slang.conversationMessageId = conversation_message_id;
             await this.slangsRepository.save(slang);
@@ -222,34 +187,13 @@ export class SlangsService {
 
     setImmediate(async () => {
       if (slang.conversationMessageId) {
-        const format: string = formatRelative(slang.date, new Date(), {
-          locale: ru
-        });
-        const link: string =
-          this.helpersService.getConfig('APP_URL') + '#slang?id=' + slang.id;
-
-        const upload: DocumentAttachment | undefined =
-          await this.helpersService.uploadCover(slang.cover);
+        const { text, params }: AdminMessage =
+          await this.helpersService.getAdminMessage(slang, true);
 
         await this.helpersService.editAdminMessage(
           slang.conversationMessageId,
-          stripIndents`
-            📩 Новый слэнг на модерации (ред.)
-      
-            🔢 ID: ${slang.id}
-            🧐 Автор: @id${currentUser.id}
-            ⏰ Дата: ${format} по МСК
-      
-            📌 Слово: ${slang.word}
-            🎬 Тип: ${slang.type}
-            📖 Краткое описание: ${slang.description}
-      
-            📎 Ссылка на модерацию: ${link}
-          `,
-          {
-            attachment: upload?.toString(),
-            keyboard: this.getKeyboard(slang.id)
-          }
+          text,
+          params
         );
       }
     });
@@ -282,20 +226,5 @@ export class SlangsService {
     await this.meiliIndex.deleteDocument(id);
 
     return slang;
-  }
-
-  private getKeyboard(slangId: number): KeyboardBuilder {
-    return Keyboard.builder()
-      .inline()
-      .callbackButton({
-        label: 'Отклонить',
-        color: ButtonColor.NEGATIVE,
-        payload: { action: 'declined', slangId }
-      })
-      .callbackButton({
-        label: 'Одобрить',
-        color: ButtonColor.POSITIVE,
-        payload: { action: 'public', slangId }
-      });
   }
 }
