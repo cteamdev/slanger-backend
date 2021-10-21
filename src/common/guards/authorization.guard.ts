@@ -84,20 +84,26 @@ export class AuthorizationGuard implements CanActivate {
   ): Promise<boolean> {
     return this.manager.transaction(
       async (transactionManager: EntityManager) => {
-        await transactionManager.query('LOCK TABLE "user"');
-
         const id: number = Number.parseInt(data.vk_user_id as string);
 
         let user: User | undefined = await transactionManager.findOne(User, {
           id
         });
         if (!user) {
-          const settings: Settings = new Settings();
+          // Лочим таблицу и ищем ещё раз, не нашли - создаем
+          await transactionManager.query('LOCK TABLE "user"');
 
-          user = new User({ id, settings });
-          if (data.vk_ref) user.ref = data.vk_ref as string;
+          user = await transactionManager.findOne(User, {
+            id
+          });
+          if (!user) {
+            const settings: Settings = new Settings();
 
-          await transactionManager.save(user);
+            user = new User({ id, settings });
+            if (data.vk_ref) user.ref = data.vk_ref as string;
+
+            await transactionManager.save(user);
+          }
         }
 
         request.currentUserId = id;
