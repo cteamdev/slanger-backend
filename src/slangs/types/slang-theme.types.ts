@@ -1,5 +1,6 @@
 export enum SlangTheme {
   SLANG = 'Слэнг',
+  DIALECT = 'Диалект',
   MEMES = 'Мемы',
   GAMES = 'Игры',
   POLITICS = 'Политика',
