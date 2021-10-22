@@ -27,10 +27,12 @@ export class User {
   points: number = 0;
 
   @Column()
+  @Expose({ groups: [Groups.CURRENT_USER] })
   @ApiProperty()
   rights: Rights = Rights.USER;
 
   @Column()
+  @Expose({ groups: [Groups.CURRENT_USER] })
   @ApiProperty()
   ref: string = 'other';
 
@@ -49,10 +51,12 @@ export class User {
   dayLimitCount: number = 0;
 
   @OneToMany(() => Slang, (slang) => slang.user)
+  @Expose({ groups: [Groups.CURRENT_USER] })
   @ApiPropertyOptional({ type: [Slang] })
   slangs: Slang[];
 
   @OneToMany(() => Bookmark, (bookmark) => bookmark.user)
+  @Expose({ groups: [Groups.CURRENT_USER] })
   @ApiPropertyOptional({ type: [Bookmark] })
   bookmarks: Bookmark[];
 
