@@ -17,6 +17,7 @@ jobs:
           key: ${{ secrets.KEY }}
           script: |
             cd ${{ secrets.PATH }}
+            git pull
             docker-compose build
             docker-compose down
             docker-compose up -d
