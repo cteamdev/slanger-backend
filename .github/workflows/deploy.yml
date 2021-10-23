@@ -1,0 +1,31 @@
+name: Deploy
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - uses: actions/setup-node@v2
+        with:
+          node-version: 16.x
+      - run: yarn
+      - run: yarn build
+      - uses: appleboy/ssh-action@master
+        with:
+          host: ${{ secrets.HOST }}
+          username: ${{ secrets.USERNAME }}
+          key: ${{ secrets.KEY }}
+          script: |
+            cd ${{ github.repository }}
+            docker-compose build
+            docker-compose down
+            docker-compose up -d
+      - uses: cteamdev/vk-actions-notify@v1
+        with:
+          token: ${{ secrets.VK_TOKEN }}
+          peer_id: ${{ secrets.VK_PEER_ID }}
