@@ -180,7 +180,13 @@ export class SlangsService {
         HttpStatus.BAD_REQUEST
       );
 
-    Object.assign(slang, body);
+    const user: User | undefined =
+      body.fromEdition &&
+      [Rights.MODERATOR, Rights.ADMIN].includes(currentUser.rights)
+        ? undefined
+        : currentUser;
+
+    Object.assign(slang, body, { user });
     await this.slangsRepository.save(slang);
 
     await this.meiliIndex.updateDocuments([slang.toMeiliEntity()]);

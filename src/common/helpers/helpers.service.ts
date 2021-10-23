@@ -129,7 +129,7 @@ export class HelpersService {
         }
 
         🔢 ID: ${slang.id}
-        🧐 Автор: @id${slang.user?.id}
+        ${slang.user ? `🧐 Автор: @id${slang.user.id}` : ''}
         ⏰ Дата: ${format} по МСК
 
         📌 Слово: ${slang.word}
