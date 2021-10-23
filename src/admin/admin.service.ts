@@ -40,7 +40,7 @@ export class AdminService {
       offset,
       limit,
       filter: ['status = moderating'],
-      sort: ['date:desc']
+      sort: ['date:asc']
     });
   }
 
