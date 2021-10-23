@@ -1,4 +1,4 @@
-FROM node:latest
+FROM node:16-alpine
 
 RUN mkdir /home/app
 COPY . /home/app
