@@ -114,10 +114,10 @@ export class SlangsService {
             HttpStatus.BAD_REQUEST
           );
 
-        const user: User | undefined =
+        const user: User | null =
           body.fromEdition &&
           [Rights.MODERATOR, Rights.ADMIN].includes(currentUser.rights)
-            ? undefined
+            ? null
             : currentUser;
 
         const slang: Slang = await transactionManager.save(
@@ -180,11 +180,11 @@ export class SlangsService {
         HttpStatus.BAD_REQUEST
       );
 
-    const user: User | undefined =
+    const user: User | null =
       body.fromEdition &&
       [Rights.MODERATOR, Rights.ADMIN].includes(currentUser.rights)
-        ? undefined
-        : currentUser;
+        ? null
+        : slang.user;
 
     Object.assign(slang, body, { user });
     await this.slangsRepository.save(slang);
