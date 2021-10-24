@@ -189,12 +189,14 @@ export class HelpersService {
     message: string,
     other: MessagesSendParams = {}
   ): Promise<number> {
-    return this.groupVK.api.messages.edit({
-      peer_id: +this.configService.get('ADMIN_PEER_ID'),
-      conversation_message_id,
-      message,
-      ...other
-    });
+    return this.groupVK.api.messages
+      .edit({
+        peer_id: +this.configService.get('ADMIN_PEER_ID'),
+        conversation_message_id,
+        message,
+        ...other
+      })
+      .catch(() => -1);
   }
 
   async uploadCover(
