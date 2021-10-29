@@ -90,10 +90,11 @@ export class AuthorizationGuard implements CanActivate {
           id
         });
         if (!user) {
-          const settings: Settings = new Settings();
-
-          user = new User({ id, settings });
+          user = new User({ id });
           if (data.vk_ref) user.ref = data.vk_ref as string;
+
+          const settings: Settings = new Settings();
+          settings.user = user;
 
           await transactionManager
             .createQueryBuilder()
@@ -102,6 +103,17 @@ export class AuthorizationGuard implements CanActivate {
             .values(user)
             .orIgnore()
             .execute();
+          await transactionManager
+            .createQueryBuilder()
+            .insert()
+            .into(Settings)
+            .values(settings)
+            .execute();
+          await transactionManager
+            .createQueryBuilder()
+            .relation(Settings, 'user')
+            .of(settings)
+            .set(user);
         }
 
         request.currentUserId = id;
