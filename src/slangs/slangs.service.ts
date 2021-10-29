@@ -123,8 +123,8 @@ export class SlangsService {
         const slang: Slang = await transactionManager.save(
           transactionManager.create(Slang, { ...body, user })
         );
-        console.log(slang, slang.toMeiliEntity());
-        await this.meiliIndex.updateDocuments([slang.toMeiliEntity()]);
+        console.log(slang, Slang.toMeiliEntity(slang));
+        await this.meiliIndex.addDocuments([Slang.toMeiliEntity(slang)]);
 
         if (user) {
           if (
@@ -190,7 +190,7 @@ export class SlangsService {
     Object.assign(slang, body, { user });
     await this.slangsRepository.save(slang);
 
-    await this.meiliIndex.updateDocuments([slang.toMeiliEntity()]);
+    await this.meiliIndex.updateDocuments([Slang.toMeiliEntity(slang)]);
 
     setImmediate(async () => {
       if (slang.conversationMessageId) {

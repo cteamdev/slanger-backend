@@ -60,7 +60,7 @@ export class AdminService {
 
     slang.status = status;
     await this.slangsRepository.save(slang);
-    await this.meiliIndex.updateDocuments([slang.toMeiliEntity()]);
+    await this.meiliIndex.updateDocuments([Slang.toMeiliEntity(slang)]);
 
     if (slang.user) {
       const points = {

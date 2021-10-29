@@ -54,14 +54,14 @@ export class Slang {
     Object.assign(this, options);
   }
 
-  toMeiliEntity(): SlangMeili {
+  public static toMeiliEntity(slang: Slang): SlangMeili {
     return {
-      ...this,
-      userId: this.user?.id,
-      user: this.user
+      ...slang,
+      userId: slang.user?.id,
+      user: slang.user
         ? {
-            id: this.user.id,
-            vk: this.user.vk
+            id: slang.user.id,
+            vk: slang.user.vk
           }
         : undefined
     };
