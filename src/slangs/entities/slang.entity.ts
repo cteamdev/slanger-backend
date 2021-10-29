@@ -55,7 +55,6 @@ export class Slang {
   }
 
   toMeiliEntity(): SlangMeili {
-    console.log(this);
     return {
       ...this,
       userId: this.user?.id,
