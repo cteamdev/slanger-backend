@@ -52,9 +52,12 @@ export class Slang {
 
   constructor(options: Partial<Slang>) {
     Object.assign(this, options);
+
+    this.toMeiliEntity = this.toMeiliEntity.bind(this);
   }
 
   toMeiliEntity(): SlangMeili {
+    console.log(this);
     return {
       ...this,
       userId: this.user?.id,
