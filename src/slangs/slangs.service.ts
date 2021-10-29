@@ -121,8 +121,9 @@ export class SlangsService {
             : currentUser;
 
         const slang: Slang = await transactionManager.save(
-          new Slang({ ...body, user })
+          transactionManager.create(Slang, { ...body, user })
         );
+        console.log(slang, slang.toMeiliEntity());
         await this.meiliIndex.updateDocuments([slang.toMeiliEntity()]);
 
         if (user) {
