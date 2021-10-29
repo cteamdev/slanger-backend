@@ -108,12 +108,14 @@ export class AuthorizationGuard implements CanActivate {
             .insert()
             .into(Settings)
             .values(settings)
+            .orIgnore()
             .execute();
           await transactionManager
             .createQueryBuilder()
             .relation(Settings, 'user')
             .of(settings)
-            .set(user);
+            .set(user)
+            .catch(() => void 0);
         }
 
         request.currentUserId = id;
