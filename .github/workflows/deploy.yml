@@ -16,6 +16,7 @@ jobs:
           username: ${{ secrets.USERNAME }}
           key: ${{ secrets.KEY }}
           script: |
+            docker rmi $(docker images --filter "dangling=true" -q --no-trunc)
             cd ${{ secrets.PATH }}
             git pull
             docker-compose build
