@@ -1,6 +1,12 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { Exclude } from 'class-transformer';
-import { Column, Entity, OneToOne, PrimaryGeneratedColumn } from 'typeorm';
+import {
+  Column,
+  Entity,
+  JoinColumn,
+  OneToOne,
+  PrimaryGeneratedColumn
+} from 'typeorm';
 
 import { User } from './user.entity';
 
@@ -10,6 +16,7 @@ export class Settings {
   @Exclude()
   id: number;
 
+  @JoinColumn()
   @OneToOne(() => User, (user) => user.settings)
   @Exclude()
   user: User;

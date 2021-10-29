@@ -1,13 +1,6 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import { Expose } from 'class-transformer';
-import {
-  Entity,
-  Column,
-  PrimaryColumn,
-  OneToOne,
-  JoinColumn,
-  OneToMany
-} from 'typeorm';
+import { Entity, Column, PrimaryColumn, OneToOne, OneToMany } from 'typeorm';
 
 import { Groups } from '@/common/types/groups.types';
 import { Rights } from '@/common/types/rights.types';
@@ -60,7 +53,6 @@ export class User {
   @ApiPropertyOptional({ type: [Bookmark] })
   bookmarks: Bookmark[];
 
-  @JoinColumn()
   @OneToOne(() => Settings, (settings) => settings.user, {
     cascade: ['insert']
   })

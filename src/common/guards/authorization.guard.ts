@@ -90,20 +90,18 @@ export class AuthorizationGuard implements CanActivate {
           id
         });
         if (!user) {
-          // Лочим таблицу и ищем ещё раз, не нашли - создаем
-          await transactionManager.query('LOCK TABLE "user"');
+          const settings: Settings = new Settings();
 
-          user = await transactionManager.findOne(User, {
-            id
-          });
-          if (!user) {
-            const settings: Settings = new Settings();
+          user = new User({ id, settings });
+          if (data.vk_ref) user.ref = data.vk_ref as string;
 
-            user = new User({ id, settings });
-            if (data.vk_ref) user.ref = data.vk_ref as string;
-
-            await transactionManager.save(user);
-          }
+          await transactionManager
+            .createQueryBuilder()
+            .insert()
+            .into(User)
+            .values(user)
+            .orIgnore()
+            .execute();
         }
 
         request.currentUserId = id;
