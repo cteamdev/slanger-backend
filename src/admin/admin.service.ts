@@ -98,7 +98,7 @@ export class AdminService {
 
       this.usersService.sendNotification({
         user: slang.user,
-        message: `🧐 Новый статус слэнга: ${statuses[status]}`,
+        message: `🧐 Новый статус сленга: ${statuses[status]}`,
         hash: 'slang?id=' + slang.id
       });
 

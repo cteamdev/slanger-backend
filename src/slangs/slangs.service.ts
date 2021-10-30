@@ -178,7 +178,7 @@ export class SlangsService {
       throw new HttpException('Доступ запрещён', HttpStatus.FORBIDDEN);
     if (!isModerator && slang.status !== SlangStatus.MODERATING)
       throw new HttpException(
-        'Редактировать можно только слэнги на модерации',
+        'Редактировать можно только сленги на модерации',
         HttpStatus.BAD_REQUEST
       );
 

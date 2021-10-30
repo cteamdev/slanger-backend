@@ -30,7 +30,7 @@ import { GetOwnDto } from './dto/get-own.dto';
 
 @Controller('slangs')
 @ApiCookieAuth('x-vk')
-@ApiTags('Слэнги')
+@ApiTags('Сленги')
 export class SlangsController {
   constructor(private readonly slangsService: SlangsService) {}
 

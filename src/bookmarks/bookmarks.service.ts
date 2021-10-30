@@ -59,7 +59,7 @@ export class BookmarksService {
       );
     if (foundBookmark)
       throw new HttpException(
-        'Этот слэнг уже есть в закладках',
+        'Этот сленг уже есть в закладках',
         HttpStatus.BAD_REQUEST
       );
 
