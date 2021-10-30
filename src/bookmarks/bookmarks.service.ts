@@ -53,7 +53,10 @@ export class BookmarksService {
     if (!slang) throw new HttpException('Не найдено', HttpStatus.NOT_FOUND);
 
     const foundBookmark: Bookmark | undefined =
-      await this.bookmarksRepository.findOne({ slang: { id: slangId } });
+      await this.bookmarksRepository.findOne(
+        { user: { id: currentUser.id }, slang: { id: slangId } },
+        { relations: ['user', 'slang'] }
+      );
     if (foundBookmark)
       throw new HttpException(
         'Этот слэнг уже есть в закладках',
