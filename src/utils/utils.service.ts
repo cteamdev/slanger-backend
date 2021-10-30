@@ -61,10 +61,12 @@ export class UtilsService {
     const { slangId, action } = eventPayload;
     if (!slangId || !action) return sendSnackbar('Не найдено');
 
-    const slang: Slang | undefined = await this.adminService.setSlangStatus({
-      id: slangId,
-      status: action
-    });
+    const slang: Slang | undefined = await this.adminService
+      .setSlangStatus({
+        id: slangId,
+        status: action
+      })
+      .catch(() => void 0);
     if (!slang) return sendSnackbar('Не найдено');
 
     const { text, params }: AdminMessage =
