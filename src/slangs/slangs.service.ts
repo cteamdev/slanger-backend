@@ -95,6 +95,15 @@ export class SlangsService {
   async create(currentUser: User, body: CreateSlangDto): Promise<Slang> {
     return this.manager.transaction(
       async (transactionManager: EntityManager) => {
+        if (
+          body.cover &&
+          !/^http(?:s|):\/\/media\d+.giphy.com\/media\/.+$/.test(body.cover)
+        )
+          throw new HttpException(
+            'В обложках разрешены ссылки только на giphy.com',
+            HttpStatus.BAD_REQUEST
+          );
+
         currentUser = (await transactionManager.findOne(
           User,
           { id: currentUser.id },
