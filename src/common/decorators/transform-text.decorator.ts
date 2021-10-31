@@ -1,8 +1,8 @@
 import { Transform } from 'class-transformer';
 
-export const TransformZalgo = (): PropertyDecorator =>
+export const TransformText = (): PropertyDecorator =>
   Transform(({ value }) =>
     typeof value === 'string'
-      ? value.replace(/(?=[\W])[ʰ-˿̀-ͯ]{1,}/gmu, '')
+      ? value.replace(/(?=[\W])[ʰ-˿̀-ͯ]{1,}/gmu, '').trim()
       : value
   );

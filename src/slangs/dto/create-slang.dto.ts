@@ -13,7 +13,7 @@ import {
   ValidatorConstraintInterface
 } from 'class-validator';
 
-import { TransformZalgo } from '@/common/decorators/transform-zalgo.decorator';
+import { TransformText } from '@/common/decorators/transform-text.decorator';
 import { SlangType } from '../types/slang-type.types';
 import { SlangTheme } from '../types/slang-theme.types';
 
@@ -68,7 +68,7 @@ export class CreateSlangDto {
 
   @IsString()
   @Length(1, 250)
-  @TransformZalgo()
+  @TransformText()
   @ApiProperty({
     minLength: 1,
     maxLength: 250
@@ -77,7 +77,7 @@ export class CreateSlangDto {
 
   @IsString()
   @Length(1, 1000)
-  @TransformZalgo()
+  @TransformText()
   @ApiProperty({
     minLength: 1,
     maxLength: 1000
