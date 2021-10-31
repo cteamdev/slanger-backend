@@ -97,7 +97,9 @@ export class SlangsService {
       async (transactionManager: EntityManager) => {
         if (
           body.cover &&
-          !/^http(?:s|):\/\/media\d+.giphy.com\/media\/.+$/.test(body.cover)
+          !/^http(?:s|):\/\/media\d+.giphy.com\/media\/[\w\d]+\/giphy.gif(?:\/|)$/.test(
+            body.cover
+          )
         )
           throw new HttpException(
             'В обложках разрешены ссылки только на giphy.com',
