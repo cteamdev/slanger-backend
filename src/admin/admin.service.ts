@@ -15,6 +15,7 @@ import { SlangMeili } from '@/slangs/types/slang-meili.types';
 import { SearchDto } from './dto/search.dto';
 import { SetSlangStatusDto } from './dto/set-slang-status.dto';
 import { SetUserRightsDto } from './dto/set-user-rights.dto';
+import { stripIndents } from 'common-tags';
 
 @Injectable()
 export class AdminService {
@@ -103,7 +104,10 @@ export class AdminService {
 
       this.usersService.sendNotification({
         user: slang.user,
-        message: `🧐 Новый статус сленга: ${statuses[status]}`,
+        message: stripIndents`
+          🧐 Новый статус сленга: ${statuses[status]}
+          💁‍♂️ Если вы не согласны с мнением модерации, напишите в сообщество @slangerpub
+        `,
         hash: 'slang?id=' + slang.id
       });
 
