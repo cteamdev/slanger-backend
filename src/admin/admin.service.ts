@@ -57,6 +57,11 @@ export class AdminService {
       }
     );
     if (!slang) throw new HttpException('Не найдено', HttpStatus.NOT_FOUND);
+    if (slang.status === status)
+      throw new HttpException(
+        'Этот сленг уже имеет данный статус',
+        HttpStatus.BAD_REQUEST
+      );
 
     slang.status = status;
     await this.slangsRepository.save(slang);
