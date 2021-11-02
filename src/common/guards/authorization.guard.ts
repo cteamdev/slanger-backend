@@ -34,6 +34,23 @@ export class AuthorizationGuard implements CanActivate {
 
     const request: Request = context.switchToHttp().getRequest();
 
+    const token: string = request.headers['x-business'] as string;
+    if (
+      token &&
+      token === this.configService.get('BUSINESS_TOKEN') &&
+      Date.now() < Date.parse(this.configService.get('BUSINESS_EXPIRES') || '')
+    ) {
+      const user: User | undefined = await this.manager.findOne(User, {
+        id: +this.configService.get('BUSINESS_USER_ID')
+      });
+      if (user) {
+        request.currentUserId = user.id;
+        request.currentUser = user;
+
+        return true;
+      }
+    }
+
     const vk: string = request.headers['x-vk'] as string;
     if (!vk) throw new HttpException('Доступ запрещен', HttpStatus.FORBIDDEN);
 
