@@ -240,6 +240,14 @@ export class SlangsService {
 
     if (!isModerator && (!slang.user || slang.user.id !== currentUser.id))
       throw new HttpException('Доступ запрещён', HttpStatus.FORBIDDEN);
+    if (
+      !isModerator &&
+      ![SlangStatus.MODERATING, SlangStatus.DECLINED].includes(slang.status)
+    )
+      throw new HttpException(
+        'Удалять можно только сленги на модерации или отклонённые модерацией',
+        HttpStatus.BAD_REQUEST
+      );
 
     await this.slangsRepository.remove(slang);
     await this.meiliIndex.deleteDocument(id);
