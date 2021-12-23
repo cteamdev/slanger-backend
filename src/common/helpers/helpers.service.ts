@@ -31,7 +31,8 @@ export class HelpersService {
   getVKInstance(propertyPath: string): VK {
     return new VK({
       token: this.configService.get(propertyPath) || '',
-      language: 'ru'
+      language: 'ru',
+      apiMode: 'parallel'
     });
   }
 
